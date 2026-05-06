@@ -170,14 +170,17 @@ public class EmailServiceImpl implements EmailService {
         log.setSentAt(LocalDateTime.now());
 
         try {
+            log.info("DEBUG: Attempting to send email to: {} with subject: {}", to, subject);
             SimpleMailMessage message = new SimpleMailMessage();
             message.setFrom(senderEmail);
             message.setTo(to);
             message.setSubject(subject);
             message.setText(content);
             mailSender.send(message);
+            log.info("DEBUG: Email sent successfully to: {}", to);
             log.setStatus("SENT");
         } catch (Exception e) {
+            log.error("EMAIL ERROR: Failed to send email to {}. Error: {}", to, e.getMessage(), e);
             log.setStatus("FAILED");
             log.setErrorMessage(e.getMessage());
         }
