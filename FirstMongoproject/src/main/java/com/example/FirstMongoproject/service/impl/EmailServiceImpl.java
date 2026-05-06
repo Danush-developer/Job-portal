@@ -161,13 +161,13 @@ public class EmailServiceImpl implements EmailService {
     }
 
     private void sendSimpleEmail(String to, String subject, String content, String appId, String jobTitle) {
-        EmailLog log = new EmailLog();
-        log.setRecipientEmail(to);
-        log.setSubject(subject);
-        log.setContent(content);
-        log.setApplicationId(appId);
-        log.setJobTitle(jobTitle);
-        log.setSentAt(LocalDateTime.now());
+        EmailLog emailLogEntry = new EmailLog();
+        emailLogEntry.setRecipientEmail(to);
+        emailLogEntry.setSubject(subject);
+        emailLogEntry.setContent(content);
+        emailLogEntry.setApplicationId(appId);
+        emailLogEntry.setJobTitle(jobTitle);
+        emailLogEntry.setSentAt(LocalDateTime.now());
 
         try {
             log.info("DEBUG: Attempting to send email to: {} with subject: {}", to, subject);
@@ -178,12 +178,12 @@ public class EmailServiceImpl implements EmailService {
             message.setText(content);
             mailSender.send(message);
             log.info("DEBUG: Email sent successfully to: {}", to);
-            log.setStatus("SENT");
+            emailLogEntry.setStatus("SENT");
         } catch (Exception e) {
             log.error("EMAIL ERROR: Failed to send email to {}. Error: {}", to, e.getMessage(), e);
-            log.setStatus("FAILED");
-            log.setErrorMessage(e.getMessage());
+            emailLogEntry.setStatus("FAILED");
+            emailLogEntry.setErrorMessage(e.getMessage());
         }
-        emailLogRepository.save(log);
+        emailLogRepository.save(emailLogEntry);
     }
 }
