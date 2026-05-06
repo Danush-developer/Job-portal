@@ -127,12 +127,23 @@ public class ApplicationServiceImpl implements ApplicationService {
                 if (normalizedDate.contains(".")) {
                     normalizedDate = normalizedDate.substring(0, normalizedDate.indexOf("."));
                 }
+                
+                // Handle DD-MM-YYYY format (e.g. 08-05-2026)
+                if (normalizedDate.length() >= 10 && normalizedDate.charAt(2) == '-' && normalizedDate.charAt(5) == '-') {
+                    String[] parts = normalizedDate.split("T");
+                    String datePart = parts[0];
+                    String timePart = parts.length > 1 ? parts[1] : "00:00:00";
+                    
+                    String[] d = datePart.split("-");
+                    normalizedDate = d[2] + "-" + d[1] + "-" + d[0] + "T" + timePart;
+                }
+
                 if (normalizedDate.length() == 16) {
                     normalizedDate += ":00";
                 }
                 app.setInterviewDate(LocalDateTime.parse(normalizedDate));
             } catch (Exception e) {
-                log.warn("Failed to parse interview date: {} - Using fallback", date);
+                log.warn("Failed to parse interview date: {} - Using fallback. Error: {}", date, e.getMessage());
                 app.setInterviewDate(LocalDateTime.now().plusDays(1));
             }
         }
