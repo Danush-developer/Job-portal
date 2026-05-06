@@ -1,0 +1,196 @@
+<div class="landing-page">
+  <!-- Hero Section -->
+  <section class="hero-section" [style.background]="slides[currentSlide].bgColor">
+    <!-- Carousel Navigation -->
+    <button class="carousel-btn prev" (click)="prevSlide()"><i class="fas fa-chevron-left"></i></button>
+    <button class="carousel-btn next" (click)="nextSlide()"><i class="fas fa-chevron-right"></i></button>
+
+    <div class="hero-container">
+      <div class="hero-content animate-slide-right">
+        <h1 class="hero-title">{{ slides[currentSlide].title }}</h1>
+        <p class="hero-subtitle">{{ slides[currentSlide].subtitle }}</p>
+        <div class="hero-actions">
+          <button class="btn btn-primary-white" routerLink="/register">Get Started</button>
+          <button class="btn btn-outline-white" routerLink="/login">Login</button>
+        </div>
+      </div>
+
+      <div class="hero-visual animate-fade-in">
+        <div class="carousel-image-wrapper">
+          <img [src]="slides[currentSlide].image" [alt]="slides[currentSlide].title" class="carousel-img">
+          <div class="image-overlay"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Company Section -->
+  <section id="company" class="content-section alternate">
+    <div class="app-container">
+      <div class="section-grid">
+        <div class="section-image">
+          <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800" alt="Office" class="rounded-image">
+        </div>
+        <div class="section-text">
+          <span class="badge-tag">Our Story</span>
+          <h2>A Legacy of Innovation & Excellence</h2>
+          <p>Founded on the principles of integrity and forward-thinking, we have grown from a small consultancy to a global technology partner. Our mission is to empower businesses through transformative digital solutions.</p>
+          <div class="stats-mini">
+            <div class="mini-stat"><strong>15+</strong><span>Years Exp</span></div>
+            <div class="mini-stat"><strong>500+</strong><span>Partners</span></div>
+            <div class="mini-stat"><strong>24/7</strong><span>Support</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Services Section -->
+  <section id="services" class="content-section">
+    <div class="app-container text-center">
+      <span class="badge-tag">What We Do</span>
+      <h2>Tailored Services for Modern Enterprises</h2>
+      <div class="services-grid">
+        <div class="service-card">
+          <div class="service-icon"><i class="fas fa-cloud"></i></div>
+          <h3>Cloud Transformation</h3>
+          <p>Migrate and optimize your infrastructure with our expert cloud architects.</p>
+        </div>
+        <div class="service-card">
+          <div class="service-icon"><i class="fas fa-microchip"></i></div>
+          <h3>AI & Automation</h3>
+          <p>Leverage cutting-edge machine learning to automate complex business workflows.</p>
+        </div>
+        <div class="service-card">
+          <div class="service-icon"><i class="fas fa-shield-halved"></i></div>
+          <h3>Cyber Security</h3>
+          <p>Protect your digital assets with our comprehensive security audit and protection.</p>
+        </div>
+        <div class="service-card">
+          <div class="service-icon"><i class="fas fa-chart-network"></i></div>
+          <h3>Digital Strategy</h3>
+          <p>Roadmaps designed to scale your business in the competitive digital landscape.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Products Section -->
+  <section id="products" class="content-section alternate">
+    <div class="app-container">
+      <div class="section-grid reverse">
+        <div class="section-image">
+          <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800" alt="Product" class="rounded-image">
+        </div>
+        <div class="section-text">
+          <span class="badge-tag">Our Products</span>
+          <h2>Intelligent Platforms for Smarter Teams</h2>
+          <p>Our suite of proprietary tools is designed to bridge the gap between complex data and actionable insights. From ERP solutions to specialized HR portals, we build for performance.</p>
+          <ul class="feature-list">
+            <li><i class="fas fa-check-circle"></i> Seamless Cloud Integration</li>
+            <li><i class="fas fa-check-circle"></i> Real-time Analytics Dashboard</li>
+            <li><i class="fas fa-check-circle"></i> Enterprise-grade Security</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- What's New Section -->
+  <section id="whats-new" class="content-section">
+    <div class="app-container">
+      <div class="section-header-inline">
+        <div>
+          <span class="badge-tag">Stay Updated</span>
+          <h2>Latest from Our Hub</h2>
+        </div>
+        <button class="btn btn-outline">View All News</button>
+      </div>
+      <div class="news-grid">
+        <div class="news-card">
+          <div class="news-date">Oct 24, 2023</div>
+          <h3>Launching Next-Gen Cloud Security Protocols</h3>
+          <p>Discover how our latest update protects against emerging quantum threats.</p>
+          <a href="#" class="read-more">Read More <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <div class="news-card">
+          <div class="news-date">Sep 15, 2023</div>
+          <h3>Expanding Our Footprint in SE Asia</h3>
+          <p>We are excited to announce the opening of our new innovation center in Singapore.</p>
+          <a href="#" class="read-more">Read More <i class="fas fa-arrow-right"></i></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Careers / Featured Jobs Section -->
+  <section id="careers" class="content-section">
+    <div class="app-container">
+      <div class="section-header text-center">
+        <span class="badge-tag">Careers</span>
+        <h2>Featured Opportunities</h2>
+        <p>Join our team and help us build the future of technology.</p>
+      </div>
+
+      <div class="jobs-landing-grid">
+        <div *ngFor="let job of jobs" class="job-landing-card">
+          <div class="job-card-header">
+            <div class="company-logo-mini">{{ job.company?.[0] }}</div>
+            <span class="job-type-badge">{{ job.jobType }}</span>
+          </div>
+          <h3>{{ job.title }}</h3>
+          <p class="company-name">{{ job.company }}</p>
+          <div class="job-meta">
+            <span><i class="fas fa-map-marker-alt"></i> {{ job.location }}</span>
+            <span><i class="fas fa-money-bill-wave"></i> {{ job.salary }}</span>
+          </div>
+          <button class="btn btn-primary full-width" (click)="openApplyModal(job)">Apply Now</button>
+        </div>
+      </div>
+
+      <div class="text-center mt-4">
+        <button class="btn btn-outline" routerLink="/user">View All Jobs</button>
+      </div>
+    </div>
+  </section>
+
+
+
+  <!-- Contact Section -->
+  <section id="contact" class="content-section alternate contact-footer">
+    <div class="app-container">
+      <div class="contact-grid">
+        <div class="contact-info-box">
+          <h2>Ready to transform your business?</h2>
+          <p>Our experts are ready to help you navigate your digital journey.</p>
+          <div class="contact-details">
+            <div class="detail"><i class="fas fa-envelope"></i> contact@stepforwardx.com</div>
+            <div class="detail"><i class="fas fa-phone"></i> +1 (555) 000-1111</div>
+            <div class="detail"><i class="fas fa-location-dot"></i> 123 Tech Plaza, Innovation Valley</div>
+          </div>
+        </div>
+        <div class="contact-form-box">
+          <form class="simple-form">
+            <input type="text" placeholder="Full Name" required>
+            <input type="email" placeholder="Email Address" required>
+            <textarea placeholder="Tell us about your project" rows="4"></textarea>
+            <button type="submit" class="btn btn-primary">Send Message</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer Bottom -->
+  <footer class="footer-bottom">
+    <div class="app-container">
+      <div class="footer-content">
+        <p>&copy; 2024 StepForwardx. All rights reserved.</p>
+        <div class="footer-links">
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms of Service</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+</div>

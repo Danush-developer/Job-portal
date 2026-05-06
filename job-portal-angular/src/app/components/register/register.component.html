@@ -1,0 +1,46 @@
+<div class="login-container animate-in">
+  <div class="glass-card login-card">
+    <div class="login-header">
+      <h1>Create Account</h1>
+      <p>Join our portal to find your dream job</p>
+    </div>
+
+    <form (submit)="onRegister()">
+      <div class="input-group">
+        <label>Full Name</label>
+        <input type="text" name="name" [(ngModel)]="user.name" placeholder="John Doe" required>
+      </div>
+
+      <div class="input-group">
+        <label>Email Address</label>
+        <input type="email" name="email" [(ngModel)]="user.email" placeholder="john@example.com" required>
+      </div>
+
+      <div class="input-group">
+        <label>Password</label>
+        <input type="password" name="password" [(ngModel)]="user.password" placeholder="••••••••" required>
+      </div>
+
+      <div class="input-group">
+        <label>I am a...</label>
+        <select name="role" [(ngModel)]="user.role">
+          <option value="USER">Job Seeker</option>
+          <option value="ADMIN">Recruiter / Admin</option>
+        </select>
+      </div>
+
+      <div *ngIf="error" class="error-msg">
+        {{ error }}
+      </div>
+
+      <button type="submit" class="btn btn-primary w-full" [disabled]="loading">
+        <span *ngIf="!loading">Create Account</span>
+        <span *ngIf="loading">Creating...</span>
+      </button>
+    </form>
+
+    <div class="login-footer">
+      <p>Already have an account? <a routerLink="/login">Login here</a></p>
+    </div>
+  </div>
+</div>

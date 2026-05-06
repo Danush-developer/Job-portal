@@ -1,0 +1,37 @@
+<div class="login-container animate-in">
+  <div class="glass-card login-card">
+    <div class="login-header">
+      <h1>Welcome Back</h1>
+      <p>Log in to manage your career path</p>
+    </div>
+
+    <form (submit)="onLogin()">
+      <div class="input-group">
+        <label>Email Address</label>
+        <input type="email" name="email" [(ngModel)]="credentials.email" placeholder="name@company.com" required>
+      </div>
+
+      <div class="input-group">
+        <label>Password</label>
+        <input type="password" name="password" [(ngModel)]="credentials.password" placeholder="••••••••" required>
+      </div>
+
+      <div *ngIf="error" class="error-msg">
+        {{ error }}
+      </div>
+
+      <button type="submit" class="btn btn-primary w-full" [disabled]="loading">
+        <span *ngIf="!loading">Sign In</span>
+        <span *ngIf="loading">Signing In...</span>
+      </button>
+
+      <div class="forgot-password">
+        <a routerLink="/forgot-password">Forgot Password?</a>
+      </div>
+    </form>
+
+    <div class="login-footer">
+      <p>Don't have an account? <a routerLink="/register">Register here</a></p>
+    </div>
+  </div>
+</div>

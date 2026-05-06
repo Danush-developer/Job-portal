@@ -1,0 +1,313 @@
+<div class="dashboard-wrapper">
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar">
+    <!-- Logo removed as requested -->
+    <div style="height: 20px;"></div> 
+    
+    <nav class="side-nav">
+      <div class="nav-label">Main Menu</div>
+      <button (click)="view = 'jobs'" [class.active]="view === 'jobs'">
+        <i class="fas fa-search"></i> Discover Jobs
+      </button>
+      <button (click)="view = 'my-apps'" [class.active]="view === 'my-apps'">
+        <i class="fas fa-briefcase"></i> My Applications
+      </button>
+      
+      <div class="nav-label" style="margin-top: 2rem;">Settings</div>
+      <button (click)="view = 'profile'" [class.active]="view === 'profile'">
+        <i class="fas fa-user-circle"></i> Profile
+      </button>
+      <button (click)="view = 'account'" [class.active]="view === 'account'">
+        <i class="fas fa-cog"></i> Account
+      </button>
+    </nav>
+  </aside>
+
+  <main class="main-content">
+    <!-- Header -->
+    <header class="content-header">
+      <div class="greeting">
+        <h1>Dashboard</h1>
+        <p>Welcome back! Here's what's happening with your career.</p>
+      </div>
+      <div class="header-actions">
+        <div class="search-bar">
+          <i class="fas fa-search"></i>
+          <input type="text" [(ngModel)]="searchTerm" (input)="filterJobs()" placeholder="Search for jobs, companies, locations...">
+        </div>
+      </div>
+    </header>
+
+    <!-- Stats Grid -->
+    <section class="stats-container animate-slide-up">
+      <div class="stat-card">
+        <div class="stat-icon primary"><i class="fas fa-eye"></i></div>
+        <div class="stat-info">
+          <span class="label">Job Matches</span>
+          <h2 class="value">{{ jobs.length }}</h2>
+          <span class="trend up">+12% vs last month</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon success"><i class="fas fa-check-circle"></i></div>
+        <div class="stat-info">
+          <span class="label">Active Applications</span>
+          <h2 class="value">{{ myApplications.length }}</h2>
+          <span class="trend">Updated 2m ago</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon warning"><i class="fas fa-star"></i></div>
+        <div class="stat-info">
+          <span class="label">Shortlisted</span>
+          <h2 class="value">{{ shortlistedCount }}</h2>
+          <span class="trend">Keep applying!</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Dynamic Content -->
+    <section class="dynamic-content animate-slide-up" style="animation-delay: 0.1s;">
+      
+      <!-- Jobs Listing -->
+      <div *ngIf="view === 'jobs'">
+        <div class="section-title">
+          <h2>Featured Opportunities</h2>
+          <p>Hand-picked jobs based on your profile.</p>
+        </div>
+        
+        <div class="jobs-grid">
+          <div *ngFor="let job of filteredJobs" class="job-card card">
+            <div class="card-header">
+              <div class="company-logo">{{ job.company?.[0] || 'J' }}</div>
+              <span class="badge badge-primary">{{ job.jobType }}</span>
+            </div>
+            <div class="card-body">
+              <h3>{{ job.title }}</h3>
+              <p class="company-name">{{ job.company }}</p>
+              <div class="job-meta">
+                <span><i class="fas fa-map-marker-alt"></i> {{ job.location }}</span>
+                <span><i class="fas fa-money-bill-wave"></i> {{ job.salary }}</span>
+              </div>
+            </div>
+            <div class="card-footer">
+              <button class="btn btn-primary" (click)="openApplyForm(job)" [disabled]="hasApplied(job.id)">
+                {{ hasApplied(job.id) ? 'Applied' : 'Apply Now' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- My Applications -->
+      <div *ngIf="view === 'my-apps'">
+        <div class="section-title">
+          <h2>My Applications</h2>
+          <p>Track the status of your job applications.</p>
+        </div>
+
+        <div class="table-container card">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Job Position</th>
+                <th>Applied Date</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let app of myApplications">
+                <td class="bold">{{ app.jobTitle || 'Position Specified' }}</td>
+                <td>{{ app.appliedDate | date:'mediumDate' }}</td>
+                <td>
+                  <span class="badge" [ngClass]="{
+                    'badge-primary': app.status === 'PENDING',
+                    'badge-success': app.status === 'HIRED' || app.status === 'SHORTLISTED',
+                    'badge-warning': app.status === 'INTERVIEW',
+                    'badge-danger': app.status === 'REJECTED'
+                  }">{{ app.status }}</span>
+                  <div *ngIf="app.status === 'INTERVIEW'" class="interview-info">
+                    <div class="interview-item">
+                      <i class="fas fa-calendar-day"></i>
+                      <span>{{ app.interviewDate | date:'MMM d, h:mm a' }}</span>
+                    </div>
+                    <div class="interview-item">
+                      <i class="fas fa-video"></i>
+                      <a [href]="getCleanLink(app.meetingLink)" target="_blank" class="meeting-link">Join Interview</a>
+                    </div>
+                  </div>
+                </td>
+                <td><button class="btn-text">View Details</button></td>
+              </tr>
+            </tbody>
+          </table>
+          <div *ngIf="myApplications.length === 0" class="empty-state">
+            <i class="fas fa-folder-open"></i>
+            <p>No applications found.</p>
+            <button class="btn btn-primary" (click)="view = 'jobs'">Find Jobs</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Application Form -->
+      <div *ngIf="view === 'apply'" class="form-container">
+        <div class="card">
+          <header class="form-header">
+            <button class="btn-icon" (click)="view = 'jobs'"><i class="fas fa-arrow-left"></i></button>
+            <div>
+              <h2>Apply for {{ selectedJob?.title }}</h2>
+              <p>Fill in the details below to submit your application.</p>
+            </div>
+          </header>
+          
+          <form (submit)="onSubmitApplication()" class="job-form">
+            <div class="form-grid">
+              <div class="input-group">
+                <label>Full Name</label>
+                <input type="text" name="name" [(ngModel)]="applicationForm.employeeName" placeholder="e.g. John Doe" required>
+              </div>
+              <div class="input-group">
+                <label>Email Address</label>
+                <input type="email" name="email" [(ngModel)]="applicationForm.employeeEmail" placeholder="john@example.com" required>
+              </div>
+              <div class="input-group">
+                <label>Phone Number</label>
+                <input type="text" name="phone" [(ngModel)]="applicationForm.phone" placeholder="+1 (555) 000-0000" required>
+              </div>
+            </div>
+            
+            <div class="input-group">
+              <label>Skills</label>
+              <textarea name="skills" [(ngModel)]="applicationForm.skills" placeholder="List your key skills..." required></textarea>
+            </div>
+
+            <div class="input-group full-width">
+              <label>Upload Resume (PDF/Doc)</label>
+              <div class="file-upload-wrapper" style="border: 2px dashed #e2e8f0; padding: 2rem; border-radius: 12px; text-align: center; cursor: pointer;" (click)="fileInput.click()">
+                <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; color: #6366f1; margin-bottom: 1rem;"></i>
+                <p style="margin: 0; color: #64748b;">{{ selectedFile ? selectedFile.name : 'Click to select or drag and drop your resume' }}</p>
+                <input #fileInput type="file" (change)="onFileSelected($event)" style="display: none;" accept=".pdf,.doc,.docx">
+              </div>
+            </div>
+
+            <div class="input-group">
+              <label>Profile Summary / Cover Letter</label>
+              <textarea name="resume" [(ngModel)]="applicationForm.resume" rows="4" placeholder="Briefly describe why you are a good fit..."></textarea>
+            </div>
+
+            <div class="form-footer">
+              <button type="button" class="btn btn-outline" (click)="view = 'jobs'">Cancel</button>
+              <button type="submit" class="btn btn-primary" [disabled]="isUploading">
+                <i class="fas" [class.fa-spinner]="isUploading" [class.fa-spin]="isUploading" [class.fa-paper-plane]="!isUploading"></i>
+                {{ isUploading ? 'Uploading...' : 'Submit Application' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Profile Management -->
+      <div *ngIf="view === 'profile'" class="form-container">
+        <div class="card">
+          <header class="form-header">
+            <div>
+              <h2>My Profile</h2>
+              <p>Manage your professional information.</p>
+            </div>
+          </header>
+          
+          <form (submit)="onUpdateProfile()" class="job-form">
+            <div class="form-grid">
+              <div class="input-group">
+                <label>Full Name</label>
+                <input type="text" name="p-name" [(ngModel)]="userProfile.name" placeholder="Full Name" required>
+              </div>
+              <div class="input-group">
+                <label>Email Address</label>
+                <input type="email" name="p-email" [(ngModel)]="userProfile.email" placeholder="Email" required>
+              </div>
+              <div class="input-group">
+                <label>Phone Number</label>
+                <input type="text" name="p-phone" [(ngModel)]="userProfile.phone" placeholder="Phone">
+              </div>
+              <div class="input-group">
+                <label>Current Designation</label>
+                <input type="text" name="p-designation" [(ngModel)]="userProfile.designation" placeholder="e.g. Software Engineer">
+              </div>
+              <div class="input-group">
+                <label>Years of Experience</label>
+                <input type="text" name="p-exp-years" [(ngModel)]="userProfile.experience" placeholder="e.g. 5">
+              </div>
+            </div>
+            
+            <div class="input-group">
+              <label>Professional Summary (Bio)</label>
+              <textarea name="p-bio" [(ngModel)]="userProfile.bio" rows="3" placeholder="Brief about your experience..."></textarea>
+            </div>
+
+            <div class="form-grid">
+              <div class="input-group">
+                <label>Skills</label>
+                <input type="text" name="p-skills" [(ngModel)]="userProfile.skills" placeholder="Java, Angular, etc.">
+              </div>
+              <div class="input-group">
+                <label>Education</label>
+                <input type="text" name="p-edu" [(ngModel)]="userProfile.education" placeholder="Degree, University">
+              </div>
+            </div>
+
+            <div class="form-footer">
+              <button type="submit" class="btn btn-primary">Save Changes</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Account Settings -->
+      <div *ngIf="view === 'account'" class="form-container">
+        <div class="card">
+          <header class="form-header">
+            <div>
+              <h2>Account Settings</h2>
+              <p>Manage your account credentials and security.</p>
+            </div>
+          </header>
+          
+          <div class="account-details" style="padding: 1.5rem;">
+            <div class="info-group" style="margin-bottom: 2rem;">
+              <h3 style="margin-bottom: 1rem; color: #1e293b;">Login Information</h3>
+              <div class="detail-item" style="display: flex; justify-content: space-between; padding: 1rem 0; border-bottom: 1px solid #f1f5f9;">
+                <span style="color: #64748b;">Email Address</span>
+                <span class="bold">{{ authService.currentUser()?.email }}</span>
+              </div>
+              <div class="detail-item" style="display: flex; justify-content: space-between; padding: 1rem 0; border-bottom: 1px solid #f1f5f9;">
+                <span style="color: #64748b;">Account Role</span>
+                <span class="badge badge-primary">{{ authService.currentUser()?.role }}</span>
+              </div>
+              <div class="detail-item" style="display: flex; justify-content: space-between; padding: 1rem 0;">
+                <span style="color: #64748b;">Member Since</span>
+                <span class="bold">April 2024</span>
+              </div>
+            </div>
+
+            <div class="security-group">
+              <h3 style="margin-bottom: 1rem; color: #1e293b;">Security</h3>
+              <div class="action-card" style="background: #f8fafc; padding: 1.5rem; border-radius: 12px; display: flex; align-items: center; gap: 1.5rem;">
+                <div style="background: #fff; width: 48px; height: 48px; border-radius: 10px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                  <i class="fas fa-key" style="color: #6366f1;"></i>
+                </div>
+                <div style="flex: 1;">
+                  <h4 style="margin: 0; color: #1e293b;">Update Password</h4>
+                  <p style="margin: 4px 0 0; font-size: 0.9rem; color: #64748b;">Keep your account secure by rotating your password.</p>
+                </div>
+                <button class="btn btn-outline" (click)="authService.logout()">Change Password</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+  </main>
+</div>
