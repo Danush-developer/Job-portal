@@ -69,43 +69,59 @@ public class EmailServiceImpl implements EmailService {
     @Async
     @Override
     public void sendApplicationConfirmation(JobApplication application) {
-        sendTemplateEmail("APPLIED", application);
+        try {
+            sendTemplateEmail("APPLIED", application);
+        } catch (Exception e) {
+            log.error("CRITICAL: Background Application Confirmation email failed: {}", e.getMessage());
+        }
     }
 
     @Async
     @Override
     public void sendStatusUpdateEmail(JobApplication application) {
-        log.info("DEBUG: Sending status update email in background for app: {}", application.getId());
-        String event = application.getStatus().toUpperCase();
-        sendTemplateEmail(event, application);
+        try {
+            log.info("DEBUG: Sending status update email in background for app: {}", application.getId());
+            String event = application.getStatus().toUpperCase();
+            sendTemplateEmail(event, application);
+        } catch (Exception e) {
+            log.error("CRITICAL: Background email failed for application {}: {}", application.getId(), e.getMessage());
+        }
     }
 
     @Async
     @Override
     public void sendPasswordResetEmail(User user, String token) {
-        EmailTemplate template = emailTemplateRepository.findByEvent("FORGOT_PASSWORD")
-                .orElse(new EmailTemplate(null, "FORGOT_PASSWORD", "Reset Your Password", "Use OTP Code: {resetToken}"));
-
-        String subject = template.getSubject();
-        String content = template.getBody()
-                .replace("{name}", user.getName() != null ? user.getName() : "User")
-                .replace("{resetToken}", token);
-
-        sendSimpleEmail(user.getEmail(), subject, content, null, "Password Reset");
+        try {
+            EmailTemplate template = emailTemplateRepository.findByEvent("FORGOT_PASSWORD")
+                    .orElse(new EmailTemplate(null, "FORGOT_PASSWORD", "Reset Your Password", "Use OTP Code: {resetToken}"));
+    
+            String subject = template.getSubject();
+            String content = template.getBody()
+                    .replace("{name}", user.getName() != null ? user.getName() : "User")
+                    .replace("{resetToken}", token);
+    
+            sendSimpleEmail(user.getEmail(), subject, content, null, "Password Reset");
+        } catch (Exception e) {
+            log.error("CRITICAL: Background Password Reset email failed: {}", e.getMessage());
+        }
     }
 
     @Async
     @Override
     public void sendNewJobAlert(Job job) {
-        List<Employee> employees = employeeRepository.findAll();
-        for (Employee emp : employees) {
-            EmailTemplate template = emailTemplateRepository.findByEvent("NEW_JOB")
-                    .orElse(new EmailTemplate(null, "NEW_JOB", "New Job Posted: {jobTitle}", "A new job {jobTitle} is available."));
-
-            String subject = replaceJobPlaceholders(template.getSubject(), job, emp);
-            String content = replaceJobPlaceholders(template.getBody(), job, emp);
-
-            sendSimpleEmail(emp.getEmail(), subject, content, null, job.getTitle());
+        try {
+            List<Employee> employees = employeeRepository.findAll();
+            for (Employee emp : employees) {
+                EmailTemplate template = emailTemplateRepository.findByEvent("NEW_JOB")
+                        .orElse(new EmailTemplate(null, "NEW_JOB", "New Job Posted: {jobTitle}", "A new job {jobTitle} is available."));
+                
+                String subject = replaceJobPlaceholders(template.getSubject(), job, emp);
+                String content = replaceJobPlaceholders(template.getBody(), job, emp);
+                
+                sendSimpleEmail(emp.getEmail(), subject, content, null, job.getTitle());
+            }
+        } catch (Exception e) {
+            log.error("CRITICAL: Background New Job Alert email failed: {}", e.getMessage());
         }
     }
 
