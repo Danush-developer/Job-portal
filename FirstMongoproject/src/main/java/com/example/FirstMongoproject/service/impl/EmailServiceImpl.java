@@ -9,12 +9,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
+import org.springframework.scheduling.annotation.Async;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.annotation.PostConstruct;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+@Slf4j
 @Service
 public class EmailServiceImpl implements EmailService {
 
@@ -63,17 +66,21 @@ public class EmailServiceImpl implements EmailService {
         }
     }
 
+    @Async
     @Override
     public void sendApplicationConfirmation(JobApplication application) {
         sendTemplateEmail("APPLIED", application);
     }
 
+    @Async
     @Override
     public void sendStatusUpdateEmail(JobApplication application) {
+        log.info("DEBUG: Sending status update email in background for app: {}", application.getId());
         String event = application.getStatus().toUpperCase();
         sendTemplateEmail(event, application);
     }
 
+    @Async
     @Override
     public void sendPasswordResetEmail(User user, String token) {
         EmailTemplate template = emailTemplateRepository.findByEvent("FORGOT_PASSWORD")
@@ -87,6 +94,7 @@ public class EmailServiceImpl implements EmailService {
         sendSimpleEmail(user.getEmail(), subject, content, null, "Password Reset");
     }
 
+    @Async
     @Override
     public void sendNewJobAlert(Job job) {
         List<Employee> employees = employeeRepository.findAll();
