@@ -67,8 +67,22 @@ export class AdminDashboardComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    // Restore view from localStorage if it exists
+    const savedView = localStorage.getItem('adminView');
+    if (savedView) {
+      this.view = savedView as any;
+    }
     this.refreshAllData();
     this.loadStats();
+  }
+
+  // Helper to switch view and persist it
+  switchView(newView: any) {
+    this.view = newView;
+    localStorage.setItem('adminView', newView);
+    if (newView === 'candidates' || newView === 'listings') {
+      this.clearFilter();
+    }
   }
 
   refreshAllData() {
@@ -445,7 +459,14 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   submitInterviewSchedule() {
-    if (!this.selectedAppForInterview || !this.interviewForm.date) return;
+    console.log('DEBUG: Submitting interview schedule...', this.interviewForm);
+    if (!this.selectedAppForInterview || !this.interviewForm.date) {
+      console.warn('DEBUG: Submission blocked - missing data', { 
+        app: this.selectedAppForInterview, 
+        date: this.interviewForm.date 
+      });
+      return;
+    }
 
     const appId = this.selectedAppForInterview.id || this.selectedAppForInterview._id;
     this.applicationService.scheduleInterview(
@@ -453,7 +474,8 @@ export class AdminDashboardComponent implements OnInit {
       this.interviewForm.date,
       this.interviewForm.link
     ).subscribe({
-      next: () => {
+      next: (res) => {
+        console.log('DEBUG: Interview scheduled successfully!', res);
         this.handleStatusUpdate(appId, 'INTERVIEW');
         this.closeInterviewModal();
       },

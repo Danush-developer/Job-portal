@@ -58,7 +58,9 @@ export class ApplicationService {
   }
 
   scheduleInterview(id: string, interviewDate: string, meetingLink: string): Observable<any> {
-    return this.http.put(`${this.apiUrl}/${id}/schedule-interview`, { interviewDate, meetingLink });
+    const url = `${this.apiUrl}/${id}/schedule-interview`;
+    console.log('DEBUG: Calling Interview API:', url, { interviewDate, meetingLink });
+    return this.http.put(url, { interviewDate, meetingLink });
   }
 
   deleteApplication(id: string): Observable<any> {

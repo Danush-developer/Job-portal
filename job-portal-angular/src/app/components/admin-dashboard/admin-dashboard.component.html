@@ -7,11 +7,11 @@
     <div class="nav-group">
       <h3 class="nav-label">Recruiter Panel</h3>
       <nav class="side-nav">
-        <button [class.active]="view === 'listings'" (click)="view = 'listings'; clearFilter()">
+        <button [class.active]="view === 'listings'" (click)="switchView('listings')">
           <i class="fas fa-briefcase"></i>
           <span>My Job Listings</span>
         </button>
-        <button [class.active]="view === 'post-job'" (click)="view = 'post-job'">
+        <button [class.active]="view === 'post-job'" (click)="switchView('post-job')">
           <i class="fas fa-plus-circle"></i>
           <span>Post New Job</span>
         </button>
@@ -21,15 +21,15 @@
     <div class="nav-group">
       <h3 class="nav-label">Management</h3>
       <nav class="side-nav">
-        <button [class.active]="view === 'candidates'" (click)="view = 'candidates'; clearFilter()">
+        <button [class.active]="view === 'candidates'" (click)="switchView('candidates')">
           <i class="fas fa-users"></i>
           <span>All Candidates</span>
         </button>
-        <button [class.active]="view === 'talent'" (click)="view = 'talent'">
+        <button [class.active]="view === 'talent'" (click)="switchView('talent')">
           <i class="fas fa-id-card"></i>
           <span>Talent Pool</span>
         </button>
-        <button [class.active]="view === 'analytics'" (click)="view = 'analytics'">
+        <button [class.active]="view === 'analytics'" (click)="switchView('analytics')">
           <i class="fas fa-chart-pie"></i>
           <span>Analytics</span>
         </button>
@@ -212,7 +212,7 @@
           <button class="btn btn-secondary" (click)="refreshAllData()">
             <i class="fas fa-sync"></i> Master Sync
           </button>
-          <button class="btn btn-primary" (click)="view = 'post-job'">
+          <button class="btn btn-primary" (click)="switchView('post-job')">
             <i class="fas fa-plus"></i> Post New Job
           </button>
         </div>
@@ -449,20 +449,20 @@
         <p class="subtext">Candidate: <span class="bold">{{ selectedAppForInterview?.employeeName }}</span></p>
         <p class="subtext">Job: <span class="bold">{{ selectedAppForInterview?.jobTitle }}</span></p>
         
-        <form (ngSubmit)="submitInterviewSchedule()" class="modal-form">
+        <div class="modal-form">
           <div class="input-group">
             <label>Interview Date & Time</label>
-            <input type="datetime-local" name="date" [(ngModel)]="interviewForm.date" required>
+            <input type="datetime-local" name="date" [(ngModel)]="interviewForm.date">
           </div>
           <div class="input-group">
             <label>Meeting Link</label>
-            <input type="url" name="link" [(ngModel)]="interviewForm.link" placeholder="https://meet.google.com/..." required>
+            <input type="url" name="link" [(ngModel)]="interviewForm.link" placeholder="https://meet.google.com/...">
           </div>
           <div class="modal-actions">
             <button type="button" class="btn btn-secondary" (click)="closeInterviewModal()">Cancel</button>
-            <button type="submit" class="btn btn-primary">Confirm Schedule</button>
+            <button type="button" class="btn btn-primary" (click)="submitInterviewSchedule()">Confirm Schedule</button>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   </div>

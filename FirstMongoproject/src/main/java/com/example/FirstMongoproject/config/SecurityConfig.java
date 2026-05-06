@@ -58,6 +58,8 @@ public class SecurityConfig {
         ));
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
+        config.addAllowedMethod(HttpMethod.PUT.name());
+        config.addAllowedMethod(HttpMethod.OPTIONS.name());
         // Required for Chrome's Private Network Access preflight checks when accessing localhost from a public site
         config.addExposedHeader("Access-Control-Allow-Private-Network");
         source.registerCorsConfiguration("/**", config);

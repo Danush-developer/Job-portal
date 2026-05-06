@@ -111,6 +111,7 @@ public class ApplicationController {
     public ResponseEntity<ApiResponse<JobApplication>> scheduleInterview(
             @PathVariable String id, 
             @RequestBody Map<String, String> request) {
+        log.info("REST Request to schedule interview for application ID: {}", id);
         try {
             String dateStr = request.get("interviewDate"); 
             String link = request.get("meetingLink");
