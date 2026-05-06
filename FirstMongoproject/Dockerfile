@@ -10,4 +10,5 @@ FROM eclipse-temurin:8-jre
 WORKDIR /app
 COPY --from=build /app/target/FirstMongoproject-0.0.1-SNAPSHOT.jar app.jar
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Use shell form to allow environment variable expansion
+ENTRYPOINT ["sh", "-c", "java -Dserver.port=${PORT:-8080} -jar app.jar"]
