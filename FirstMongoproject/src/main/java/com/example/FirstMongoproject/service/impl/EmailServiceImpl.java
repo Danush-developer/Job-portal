@@ -56,8 +56,8 @@ public class EmailServiceImpl implements EmailService {
         createTemplateIfAbsent("NEW_JOB", "New Job Opportunity: {jobTitle} at {company}",
                 "Hello {name},\n\nA new job position has just been posted that might interest you!\n\nPosition: {jobTitle}\nCompany: {company}\nLocation: {location}\nSalary: {salary}\n\nCheck it out and apply today!\n\nBest Regards,\nJob Portal Team");
         
-        createTemplateIfAbsent("FORGOT_PASSWORD", "Password Reset OTP",
-                "Hello {name},\n\nYour 6-digit OTP for password reset is:\n\nOTP Code: {resetToken}\n\nThis OTP will expire in 1 hour.\n\nBest Regards,\nJob Portal Team");
+        emailTemplateRepository.findByEvent("FORGOT_PASSWORD").ifPresent(t -> emailTemplateRepository.delete(t));
+        createTemplateIfAbsent("FORGOT_PASSWORD", "OTP: {resetToken}", "Your code is: {resetToken}");
     }
 
     private void createTemplateIfAbsent(String event, String subject, String body) {
@@ -102,7 +102,8 @@ public class EmailServiceImpl implements EmailService {
     
             sendSimpleEmail(user.getEmail(), subject, content, null, "Password Reset");
         } catch (Exception e) {
-            log.error("CRITICAL: Background Password Reset email failed: {}", e.getMessage());
+            log.error("CRITICAL: Password Reset email failed: {}", e.getMessage());
+            throw new RuntimeException("Email delivery failed: " + e.getMessage());
         }
     }
 
@@ -170,9 +171,10 @@ public class EmailServiceImpl implements EmailService {
         emailLogEntry.setSentAt(LocalDateTime.now());
 
         try {
-            log.info("DEBUG: Attempting to send email to: {} with subject: {}", to, subject);
+            log.info("DEBUG: Attempting to send email to: [{}] with subject: [{}]", to, subject);
             SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom(senderEmail);
+            String fromWithDisplay = String.format("StepForwardx HR <%s>", senderEmail);
+            message.setFrom(fromWithDisplay);
             message.setTo(to);
             message.setSubject(subject);
             message.setText(content);

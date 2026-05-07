@@ -165,7 +165,7 @@ export class NavbarComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    if (this.authService.currentUser() && (!this.authService.getName() || this.authService.getName() === 'User')) {
+    if (this.authService.getToken() && this.authService.currentUser() && (!this.authService.getName() || this.authService.getName() === 'User')) {
       const userId = this.authService.getUserId();
       this.authService.refreshNameFromProfile(userId).subscribe({
         next: (name: string) => {
