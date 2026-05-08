@@ -33,7 +33,7 @@ public class EmailServiceImpl implements EmailService {
     @Autowired
     private EmployeeRepository employeeRepository;
 
-    @org.springframework.beans.factory.annotation.Value("${spring.mail.username}")
+    @org.springframework.beans.factory.annotation.Value("${app.mail.sender}")
     private String senderEmail;
 
     @PostConstruct
