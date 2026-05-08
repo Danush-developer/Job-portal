@@ -310,3 +310,16 @@
   background: #fef3c7;
   color: #d97706;
 }
+
+.header-badges {
+  display: flex;
+  gap: 8px;
+}
+
+.expiry-msg {
+  font-size: 0.75rem;
+  color: #ef4444;
+  font-weight: 600;
+  margin-top: 8px;
+  text-align: center;
+}

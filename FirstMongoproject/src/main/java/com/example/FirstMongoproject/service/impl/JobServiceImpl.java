@@ -24,7 +24,14 @@ public class JobServiceImpl implements JobService {
     public Job createJob(Job job) {
         job.setPostedDate(LocalDateTime.now());
         job.setUpdatedDate(LocalDateTime.now());
-        job.setIsActive(true);
+        
+        // Instant check: if endDate is in the past, mark as inactive immediately
+        if (job.getEndDate() != null && job.getEndDate().isBefore(LocalDateTime.now())) {
+            job.setIsActive(false);
+        } else {
+            job.setIsActive(true);
+        }
+        
         job.setTotalApplications(0);
         Job saved = jobRepository.save(job);
 
@@ -48,8 +55,44 @@ public class JobServiceImpl implements JobService {
         job.setExperienceLevel(jobDetails.getExperienceLevel());
         job.setSalary(jobDetails.getSalary());
         job.setRequiredSkills(jobDetails.getRequiredSkills());
+        job.setStartDate(jobDetails.getStartDate());
+        job.setEndDate(jobDetails.getEndDate());
         job.setUpdatedDate(LocalDateTime.now());
+
+        // Instant check on update
+        if (job.getEndDate() != null && job.getEndDate().isBefore(LocalDateTime.now())) {
+            job.setIsActive(false);
+        } else if (jobDetails.getIsActive() != null) {
+            job.setIsActive(jobDetails.getIsActive());
+        }
+
         return jobRepository.save(job);
+    }
+
+    @org.springframework.scheduling.annotation.Scheduled(cron = "0 * * * * *")
+    public void deactivateExpiredJobs() {
+        LocalDateTime now = LocalDateTime.now();
+        log.info("--- STARTING EXPIRY CHECK at {} ---", now);
+        
+        List<Job> allJobs = jobRepository.findAll();
+        int deactivatedCount = 0;
+        
+        for (Job job : allJobs) {
+            if (Boolean.TRUE.equals(job.getIsActive())) {
+                if (job.getEndDate() != null) {
+                    log.info("Checking Job: '{}' | EndDate: {} | Current Server Time: {}", 
+                             job.getTitle(), job.getEndDate(), now);
+                    
+                    if (job.getEndDate().isBefore(now)) {
+                        job.setIsActive(false);
+                        jobRepository.save(job);
+                        deactivatedCount++;
+                        log.info(">>> SUCCESS: DEACTIVATED JOB: '{}' because it expired at {}", job.getTitle(), job.getEndDate());
+                    }
+                }
+            }
+        }
+        log.info("--- EXPIRY CHECK FINISHED. Deactivated {} jobs ---", deactivatedCount);
     }
 
     @Override
@@ -63,7 +106,7 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public List<Job> getAllActiveJobs() {
+    public List<Job> getAllJobs() {
         return jobRepository.findAll();
     }
 

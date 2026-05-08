@@ -57,7 +57,8 @@ public class EmailServiceImpl implements EmailService {
                 "Hello {name},\n\nA new job position has just been posted that might interest you!\n\nPosition: {jobTitle}\nCompany: {company}\nLocation: {location}\nSalary: {salary}\n\nCheck it out and apply today!\n\nBest Regards,\nJob Portal Team");
         
         emailTemplateRepository.findByEvent("FORGOT_PASSWORD").ifPresent(t -> emailTemplateRepository.delete(t));
-        createTemplateIfAbsent("FORGOT_PASSWORD", "OTP: {resetToken}", "Your code is: {resetToken}");
+        createTemplateIfAbsent("FORGOT_PASSWORD", "Password Reset OTP - StepForwardx", 
+                "Hello,\n\nYou requested a password reset for your StepForwardx account. Please use the following One-Time Password (OTP) to proceed:\n\nOTP Code: {resetToken}\n\nThis code is valid for 10 minutes. If you did not request this reset, please ignore this email.\n\nBest Regards,\nStepForwardx HR Team");
     }
 
     private void createTemplateIfAbsent(String event, String subject, String body) {
@@ -93,7 +94,8 @@ public class EmailServiceImpl implements EmailService {
     public void sendPasswordResetEmail(User user, String token) {
         try {
             EmailTemplate template = emailTemplateRepository.findByEvent("FORGOT_PASSWORD")
-                    .orElse(new EmailTemplate(null, "FORGOT_PASSWORD", "Reset Your Password", "Use OTP Code: {resetToken}"));
+                    .orElse(new EmailTemplate(null, "FORGOT_PASSWORD", "Password Reset OTP - StepForwardx", 
+                        "Hello,\n\nYou requested a password reset for your StepForwardx account. Please use the following One-Time Password (OTP) to proceed:\n\nOTP Code: {resetToken}\n\nThis code is valid for 10 minutes. If you did not request this reset, please ignore this email.\n\nBest Regards,\nStepForwardx HR Team"));
     
             String subject = template.getSubject();
             String content = template.getBody()

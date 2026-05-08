@@ -8,7 +8,7 @@ public interface JobService {
     Job updateJob(String id, Job job);
     void deleteJob(String id);
     Job getJobById(String id);
-    List<Job> getAllActiveJobs();
+    List<Job> getAllJobs();
     List<Job> getJobsByAdmin(String adminId);
     List<Job> searchJobsByTitle(String title);
     List<Job> searchJobsByLocation(String location);

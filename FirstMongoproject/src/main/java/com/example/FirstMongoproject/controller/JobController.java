@@ -45,8 +45,8 @@ public class JobController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<Job>>> getAllJobs() {
-        List<Job> jobs = jobService.getAllActiveJobs();
-        return ResponseEntity.ok(ApiResponse.success("All active jobs fetched", jobs));
+        List<Job> jobs = jobService.getAllJobs();
+        return ResponseEntity.ok(ApiResponse.success("All jobs fetched", jobs));
     }
 
     @GetMapping("/admin/{adminId}")

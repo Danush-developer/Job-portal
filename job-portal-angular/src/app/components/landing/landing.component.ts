@@ -70,7 +70,7 @@ export class LandingComponent implements OnInit {
 
   openApplyModal(job: any) {
     // Save job context to localStorage before redirecting to login
-    localStorage.setItem('pendingJobId', job.id);
+    localStorage.setItem('pendingJobId', job.id || job._id);
     localStorage.setItem('pendingJobTitle', job.title);
     
     // Redirect to login

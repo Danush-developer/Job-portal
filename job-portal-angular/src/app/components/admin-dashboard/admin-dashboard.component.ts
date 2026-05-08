@@ -33,7 +33,8 @@ export class AdminDashboardComponent implements OnInit {
   jobForm = {
     title: '', description: '', company: '', location: '',
     jobType: 'Full-time', experienceLevel: '', salary: '',
-    requiredSkills: '', postedBy: ''
+    requiredSkills: '', postedBy: '',
+    startDate: '', endDate: ''
   };
 
   // Interview Modal State
@@ -382,6 +383,13 @@ export class AdminDashboardComponent implements OnInit {
   editJob(job: any) {
     this.editingJob = job;
     this.jobForm = { ...job };
+    // Format dates for datetime-local input if they exist
+    if (this.jobForm.startDate) {
+      this.jobForm.startDate = new Date(this.jobForm.startDate).toISOString().slice(0, 16);
+    }
+    if (this.jobForm.endDate) {
+      this.jobForm.endDate = new Date(this.jobForm.endDate).toISOString().slice(0, 16);
+    }
     this.view = 'post-job';
   }
 
@@ -496,7 +504,8 @@ export class AdminDashboardComponent implements OnInit {
     this.jobForm = {
       title: '', description: '', company: '', location: '',
       jobType: 'Full-time', experienceLevel: '', salary: '',
-      requiredSkills: '', postedBy: ''
+      requiredSkills: '', postedBy: '',
+      startDate: '', endDate: ''
     };
     this.view = 'listings';
   }

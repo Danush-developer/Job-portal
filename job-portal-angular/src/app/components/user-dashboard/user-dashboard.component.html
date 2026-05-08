@@ -80,7 +80,12 @@
           <div *ngFor="let job of filteredJobs" class="job-card card">
             <div class="card-header">
               <div class="company-logo">{{ job.company?.[0] || 'J' }}</div>
-              <span class="badge badge-primary">{{ job.jobType }}</span>
+              <div class="header-badges">
+                <span class="badge" [ngClass]="job.isActive ? 'badge-primary' : 'badge-danger'">
+                  {{ job.isActive ? job.jobType : 'Closed' }}
+                </span>
+                <span *ngIf="!job.isActive" class="badge badge-warning">No longer exists</span>
+              </div>
             </div>
             <div class="card-body">
               <h3>{{ job.title }}</h3>
@@ -88,12 +93,14 @@
               <div class="job-meta">
                 <span><i class="fas fa-map-marker-alt"></i> {{ job.location }}</span>
                 <span><i class="fas fa-money-bill-wave"></i> {{ job.salary }}</span>
+                <span><i class="fas fa-briefcase"></i> {{ job.experienceLevel }}</span>
               </div>
             </div>
             <div class="card-footer">
-              <button class="btn btn-primary" (click)="openApplyForm(job)" [disabled]="hasApplied(job.id)">
-                {{ hasApplied(job.id) ? 'Applied' : 'Apply Now' }}
+              <button class="btn btn-primary" (click)="openApplyForm(job)" [disabled]="hasApplied(job.id) || !job.isActive">
+                {{ !job.isActive ? 'Closed' : (hasApplied(job.id) ? 'Applied' : 'Apply Now') }}
               </button>
+              <p *ngIf="!job.isActive" class="expiry-msg">Application deadline has passed</p>
             </div>
           </div>
         </div>

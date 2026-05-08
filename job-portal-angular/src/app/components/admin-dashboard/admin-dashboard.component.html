@@ -243,8 +243,9 @@
               <th>JOB POSITION</th>
               <th>COMPANY</th>
               <th>CANDIDATES</th>
-              <th>TYPE</th>
-              <th>ACTIONS</th>
+               <th>TYPE</th>
+               <th>STATUS</th>
+               <th>ACTIONS</th>
             </tr>
           </thead>
           <tbody>
@@ -257,8 +258,16 @@
                   <span>{{ getJobCount(job) || job.totalApplications || 0 }} Applicants</span>
                 </div>
               </td>
-              <td><span class="job-chip">{{ job.jobType }}</span></td>
-              <td>
+               <td><span class="job-chip">{{ job.jobType }}</span></td>
+               <td>
+                 <span class="badge" [ngClass]="job.isActive ? 'badge-success' : 'badge-danger'">
+                   {{ job.isActive ? 'Active' : 'Expired' }}
+                 </span>
+                 <p *ngIf="!job.isActive" class="subtext" style="color: #ef4444; font-size: 0.65rem; margin-top: 4px;">
+                   No longer exists
+                 </p>
+               </td>
+               <td>
                 <div class="actions-cell">
                   <button class="btn-icon-small" (click)="viewJobApplications(job.id || job._id, job.title)" title="View Applicants">
                     <i class="fas fa-eye"></i>
@@ -298,6 +307,14 @@
             <div class="input-group">
               <label>Job Title</label>
               <input type="text" name="title" [(ngModel)]="jobForm.title" required>
+            </div>
+            <div class="input-group">
+              <label>Job Active From</label>
+              <input type="datetime-local" name="startDate" [(ngModel)]="jobForm.startDate" required>
+            </div>
+            <div class="input-group">
+              <label>Job Active Until</label>
+              <input type="datetime-local" name="endDate" [(ngModel)]="jobForm.endDate" required>
             </div>
             <div class="input-group">
               <label>Company</label>
