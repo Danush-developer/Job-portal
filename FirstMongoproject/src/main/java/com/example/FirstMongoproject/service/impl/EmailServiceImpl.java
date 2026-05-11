@@ -24,7 +24,7 @@ import java.util.List;
 @Service
 public class EmailServiceImpl implements EmailService {
 
-    @org.springframework.beans.factory.annotation.Value("${SENDGRID_API_KEY}")
+    @org.springframework.beans.factory.annotation.Value("${SENDGRID_API_KEY:}")
     private String apiKey;
 
     @Autowired
