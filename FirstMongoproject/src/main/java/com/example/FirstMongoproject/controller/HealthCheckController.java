@@ -8,10 +8,9 @@ import java.util.Map;
 import java.time.LocalDateTime;
 
 @RestController
-@RequestMapping("/api/health")
 public class HealthCheckController {
 
-    @GetMapping
+    @GetMapping({"/", "/health", "/api/health"})
     public Map<String, Object> healthCheck() {
         Map<String, Object> status = new HashMap<>();
         status.put("status", "UP");
