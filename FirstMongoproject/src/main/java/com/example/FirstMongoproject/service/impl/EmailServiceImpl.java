@@ -7,10 +7,13 @@ import com.example.FirstMongoproject.repository.EmployeeRepository;
 import com.example.FirstMongoproject.service.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.scheduling.annotation.Async;
 import lombok.extern.slf4j.Slf4j;
+import com.sendgrid.*;
+import com.sendgrid.helpers.mail.Mail;
+import com.sendgrid.helpers.mail.objects.Content;
+import com.sendgrid.helpers.mail.objects.Email;
 
 import javax.annotation.PostConstruct;
 import java.time.LocalDateTime;
@@ -21,8 +24,8 @@ import java.util.List;
 @Service
 public class EmailServiceImpl implements EmailService {
 
-    @Autowired
-    private JavaMailSender mailSender;
+    @org.springframework.beans.factory.annotation.Value("${SENDGRID_API_KEY}")
+    private String apiKey;
 
     @Autowired
     private EmailLogRepository emailLogRepository;
@@ -173,18 +176,32 @@ public class EmailServiceImpl implements EmailService {
         emailLogEntry.setSentAt(LocalDateTime.now());
 
         try {
-            log.info("DEBUG: Attempting to send email to: [{}] with subject: [{}]", to, subject);
-            SimpleMailMessage message = new SimpleMailMessage();
-            String fromWithDisplay = String.format("StepForwardx HR <%s>", senderEmail);
-            message.setFrom(fromWithDisplay);
-            message.setTo(to);
-            message.setSubject(subject);
-            message.setText(content);
-            mailSender.send(message);
-            log.info("DEBUG: Email sent successfully to: {}", to);
-            emailLogEntry.setStatus("SENT");
+            log.info("DEBUG: Attempting to send email via SendGrid Web API to: [{}] with subject: [{}]", to, subject);
+            
+            Email from = new Email(senderEmail, "StepForwardx HR");
+            Email recipient = new Email(to);
+            Content mailContent = new Content("text/plain", content);
+            Mail mail = new Mail(from, subject, recipient, mailContent);
+
+            SendGrid sg = new SendGrid(apiKey);
+            Request request = new Request();
+            
+            request.setMethod(Method.POST);
+            request.setEndpoint("mail/send");
+            request.setBody(mail.build());
+            
+            Response response = sg.api(request);
+            
+            log.info("DEBUG: SendGrid Status Code: {}", response.getStatusCode());
+            if (response.getStatusCode() >= 200 && response.getStatusCode() < 300) {
+                log.info("DEBUG: Email sent successfully via SendGrid Web API to: {}", to);
+                emailLogEntry.setStatus("SENT");
+            } else {
+                log.error("DEBUG: SendGrid Error Response: {}", response.getBody());
+                throw new RuntimeException("SendGrid failed with status: " + response.getStatusCode());
+            }
         } catch (Exception e) {
-            log.error("EMAIL ERROR: Failed to send email to {}. Error: {}", to, e.getMessage(), e);
+            log.error("EMAIL ERROR: Failed to send email via SendGrid API to {}. Error: {}", to, e.getMessage(), e);
             emailLogEntry.setStatus("FAILED");
             emailLogEntry.setErrorMessage(e.getMessage());
         }
