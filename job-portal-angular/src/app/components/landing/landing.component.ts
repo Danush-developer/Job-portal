@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { JobService } from '../../services/job.service';
@@ -70,7 +70,8 @@ export class LandingComponent implements OnInit {
     private applicationService: ApplicationService,
     private contactService: ContactService,
     private toastService: ToastService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {
@@ -149,14 +150,16 @@ export class LandingComponent implements OnInit {
     this.contactService.submitMessage(this.contactForm).subscribe({
       next: (res) => {
         console.log('DEBUG: Contact form submitted successfully', res);
+        this.isSubmittingContact = false;
         this.toastService.show('Thank you! Your message has been sent.', 'success');
         this.contactForm = { name: '', email: '', message: '' };
-        this.isSubmittingContact = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('DEBUG: Failed to submit contact form', err);
-        this.toastService.show('Failed to send message. Please try again.', 'error');
         this.isSubmittingContact = false;
+        this.toastService.show('Failed to send message. Please try again.', 'error');
+        this.cdr.detectChanges();
       }
     });
   }
