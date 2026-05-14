@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/contact")
+@RequestMapping("/contact")
 @CrossOrigin(origins = "*")
 public class ContactController {
 

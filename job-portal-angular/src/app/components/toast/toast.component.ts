@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { NotificationService } from '../../services/notification.service';
 import { AuthService } from '../../services/auth.service';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-toast',
@@ -49,7 +50,8 @@ export class ToastComponent implements OnInit {
 
   constructor(
     private notificationService: NotificationService,
-    private authService: AuthService
+    private authService: AuthService,
+    private toastService: ToastService
   ) {}
 
   ngOnInit() {
@@ -60,6 +62,11 @@ export class ToastComponent implements OnInit {
         this.addToast(msg);
       });
     }
+
+    // Subscribe to manual toast messages
+    this.toastService.toasts$.subscribe(toast => {
+      this.addToast(toast.message, toast.type);
+    });
   }
 
   addToast(message: string, type: string = 'info') {
