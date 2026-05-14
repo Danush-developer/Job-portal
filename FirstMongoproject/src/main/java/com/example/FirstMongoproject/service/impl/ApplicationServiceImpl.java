@@ -10,6 +10,8 @@ import com.example.FirstMongoproject.repository.UserRepository;
 import com.example.FirstMongoproject.service.ApplicationService;
 import com.example.FirstMongoproject.service.EmailService;
 import com.example.FirstMongoproject.service.NotificationService;
+import com.example.FirstMongoproject.service.AIService;
+import com.example.FirstMongoproject.service.DocumentParserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
