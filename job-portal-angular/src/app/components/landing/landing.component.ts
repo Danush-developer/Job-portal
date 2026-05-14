@@ -139,6 +139,7 @@ export class LandingComponent implements OnInit {
     ];
   }
   onSubmitContact() {
+    console.log('DEBUG: Contact form submission started', this.contactForm);
     if (!this.contactForm.name || !this.contactForm.email || !this.contactForm.message) {
       this.toastService.show('Please fill all fields', 'error');
       return;
@@ -147,12 +148,13 @@ export class LandingComponent implements OnInit {
     this.isSubmittingContact = true;
     this.contactService.submitMessage(this.contactForm).subscribe({
       next: (res) => {
+        console.log('DEBUG: Contact form submitted successfully', res);
         this.toastService.show('Thank you! Your message has been sent.', 'success');
         this.contactForm = { name: '', email: '', message: '' };
         this.isSubmittingContact = false;
       },
       error: (err) => {
-        console.error('Failed to submit contact form:', err);
+        console.error('DEBUG: Failed to submit contact form', err);
         this.toastService.show('Failed to send message. Please try again.', 'error');
         this.isSubmittingContact = false;
       }
