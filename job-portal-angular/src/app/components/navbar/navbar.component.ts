@@ -11,7 +11,7 @@ import { AuthService } from '../../services/auth.service';
     <nav class="top-navbar">
       <div class="app-container nav-content">
         <div class="brand" routerLink="/">
-          <div class="brand-icon">SF</div>
+          <img src="images/logo.png" alt="StepForwardx Logo" class="brand-logo">
           <div class="brand-text-group">
             <span class="brand-name">StepForwardx</span>
             <span class="brand-tagline">COMPETENT . COLLABORATIVE . CONSISTENT</span>
@@ -70,17 +70,10 @@ import { AuthService } from '../../services/auth.service';
       gap: 15px;
       cursor: pointer;
     }
-    .brand-icon {
-      width: 42px;
-      height: 42px;
-      background: #1e1b4b;
-      color: white;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 800;
-      font-size: 1rem;
+    .brand-logo {
+      height: 48px;
+      width: auto;
+      object-fit: contain;
     }
     .brand-text-group {
       display: flex;
