@@ -33,6 +33,11 @@
           <i class="fas fa-chart-pie"></i>
           <span>Analytics</span>
         </button>
+        <button [class.active]="view === 'queries'" (click)="switchView('queries')">
+          <i class="fas fa-question-circle"></i>
+          <span>Support Queries</span>
+          <span *ngIf="contactMessages.length > 0" class="badge badge-danger" style="font-size: 0.6rem; padding: 2px 6px; margin-left: 8px;">{{ contactMessages.length }}</span>
+        </button>
       </nav>
     </div>
   </aside>
@@ -448,6 +453,85 @@
               <td style="color: #f59e0b; font-weight: 600;">{{ getStatusCountForJob(job, 'INTERVIEW') }}</td>
               <td style="color: #6366f1; font-weight: 600;">{{ getStatusCountForJob(job, 'HIRED') }}</td>
               <td style="color: #ef4444; font-weight: 600;">{{ getStatusCountForJob(job, 'REJECTED') }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- View: Support Queries (Contact Form Submissions) -->
+    <div *ngIf="view === 'queries'" class="view-container animate-fade-in">
+      <div class="content-header">
+        <div class="greeting">
+          <h1>Support Queries</h1>
+          <p>Customer inquiries from the landing page contact form.</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn btn-secondary" (click)="loadContactMessages()">
+            <i class="fas fa-sync"></i> Refresh Queries
+          </button>
+        </div>
+      </div>
+
+      <div class="section-header">
+        <h2>Customer Messages</h2>
+        <div class="search-box">
+          <i class="fas fa-search"></i>
+          <input type="text" placeholder="Search by name, email, or message..." #querySearch (input)="filterMessages(querySearch.value)">
+        </div>
+      </div>
+
+      <div class="table-container card">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>SENDER</th>
+              <th>MESSAGE</th>
+              <th>DATE</th>
+              <th>STATUS</th>
+              <th>ACTIONS</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let msg of filteredMessages">
+              <td>
+                <div class="candidate-info">
+                  <div class="avatar">{{ msg.name?.[0] || 'Q' }}</div>
+                  <div class="name-box">
+                    <span class="bold">{{ msg.name }}</span>
+                    <span class="subtext">{{ msg.email }}</span>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div class="message-preview" [title]="msg.message" style="max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                  {{ msg.message }}
+                </div>
+              </td>
+              <td class="subtext">{{ msg.createdAt | date:'medium' }}</td>
+              <td>
+                <span class="badge" [ngClass]="msg.status === 'PENDING' ? 'badge-warning' : 'badge-success'">
+                  {{ msg.status }}
+                </span>
+              </td>
+              <td>
+                <div class="actions-cell">
+                  <select (change)="updateMessageStatus(msg.id || msg._id, $any($event.target).value)" class="status-select">
+                    <option value="">Update</option>
+                    <option value="PENDING">Pending</option>
+                    <option value="RESOLVED">Resolved</option>
+                  </select>
+                  <button class="btn-delete" (click)="deleteMessage(msg.id || msg._id)">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="filteredMessages.length === 0">
+              <td colspan="5" class="empty-state">
+                <i class="fas fa-envelope-open"></i>
+                <p>No support queries found.</p>
+              </td>
             </tr>
           </tbody>
         </table>

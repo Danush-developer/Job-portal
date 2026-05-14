@@ -3,7 +3,9 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { JobService } from '../../services/job.service';
 import { ApplicationService } from '../../services/application.service';
+import { ContactService } from '../../services/contact.service';
 import { FormsModule } from '@angular/forms';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-landing',
@@ -56,9 +58,18 @@ export class LandingComponent implements OnInit {
   };
   resumeFile: File | null = null;
 
+  contactForm = {
+    name: '',
+    email: '',
+    message: ''
+  };
+  isSubmittingContact = false;
+
   constructor(
     private jobService: JobService, 
     private applicationService: ApplicationService,
+    private contactService: ContactService,
+    private toastService: ToastService,
     private router: Router
   ) { }
 
@@ -126,5 +137,25 @@ export class LandingComponent implements OnInit {
         jobType: 'FULL-TIME'
       }
     ];
+  }
+  onSubmitContact() {
+    if (!this.contactForm.name || !this.contactForm.email || !this.contactForm.message) {
+      this.toastService.show('Please fill all fields', 'error');
+      return;
+    }
+
+    this.isSubmittingContact = true;
+    this.contactService.submitMessage(this.contactForm).subscribe({
+      next: (res) => {
+        this.toastService.show('Thank you! Your message has been sent.', 'success');
+        this.contactForm = { name: '', email: '', message: '' };
+        this.isSubmittingContact = false;
+      },
+      error: (err) => {
+        console.error('Failed to submit contact form:', err);
+        this.toastService.show('Failed to send message. Please try again.', 'error');
+        this.isSubmittingContact = false;
+      }
+    });
   }
 }

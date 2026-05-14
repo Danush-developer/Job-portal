@@ -5,6 +5,7 @@ import { JobService } from '../../services/job.service';
 import { ApplicationService } from '../../services/application.service';
 import { AuthService } from '../../services/auth.service';
 import { EmployeeService } from '../../services/employee.service';
+import { ContactService } from '../../services/contact.service';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { forkJoin } from 'rxjs';
@@ -22,7 +23,9 @@ export class AdminDashboardComponent implements OnInit {
   filteredApplications: any[] = [];
   talentPool: any[] = [];
   filteredTalent: any[] = [];
-  view: 'listings' | 'post-job' | 'candidates' | 'analytics' | 'talent' = 'listings';
+  contactMessages: any[] = [];
+  filteredMessages: any[] = [];
+  view: 'listings' | 'post-job' | 'candidates' | 'analytics' | 'talent' | 'queries' = 'listings';
   stats: any = { totalJobs: 0, totalApplications: 0, totalEmployees: 0 };
   jobApplicantCounts: { [key: string]: number } = {};
   currentFilterTitle: string = '';
@@ -63,6 +66,7 @@ export class AdminDashboardComponent implements OnInit {
     private applicationService: ApplicationService,
     private authService: AuthService,
     private employeeService: EmployeeService,
+    private contactService: ContactService,
     private http: HttpClient,
     private cdr: ChangeDetectorRef
   ) {}
@@ -91,13 +95,15 @@ export class AdminDashboardComponent implements OnInit {
     forkJoin({
       jobs: this.jobService.getAllJobs(),
       apps: this.applicationService.getAllApplications(),
-      talent: this.employeeService.getAllEmployees()
+      talent: this.employeeService.getAllEmployees(),
+      messages: this.contactService.getAllMessages()
     }).subscribe({
       next: (result: any) => {
         // Robust extraction: Handle ApiResponse object OR direct array
         const jobsRes = result.jobs;
         const appsRes = result.apps;
         const talentRes = result.talent;
+        const messagesRes = result.messages;
         
         // Filter out ghost jobs (those with no title)
         const rawJobs = jobsRes?.data || (Array.isArray(jobsRes) ? jobsRes : []);
@@ -109,10 +115,14 @@ export class AdminDashboardComponent implements OnInit {
         this.talentPool = talentRes?.data || (Array.isArray(talentRes) ? talentRes : []);
         this.filteredTalent = [...this.talentPool];
 
+        this.contactMessages = messagesRes?.data || (Array.isArray(messagesRes) ? messagesRes : []);
+        this.filteredMessages = [...this.contactMessages];
+
         console.log('ULTIMATE RECOVERY: Sync Result', { 
           jobsCount: this.jobs.length, 
           appsCount: this.applications.length,
-          talentCount: this.talentPool.length
+          talentCount: this.talentPool.length,
+          messagesCount: this.contactMessages.length
         });
         
         if (this.applications.length === 0 && this.jobs.length > 0) {
@@ -530,5 +540,47 @@ export class AdminDashboardComponent implements OnInit {
       }
       return false;
     }).length;
+  }
+
+  loadContactMessages() {
+    this.contactService.getAllMessages().subscribe({
+      next: (res: any) => {
+        this.contactMessages = res.data || (Array.isArray(res) ? res : []);
+        this.filteredMessages = [...this.contactMessages];
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  filterMessages(searchTerm: string) {
+    if (!searchTerm) {
+      this.filteredMessages = [...this.contactMessages];
+    } else {
+      const term = searchTerm.toLowerCase();
+      this.filteredMessages = this.contactMessages.filter(m => 
+        (m.name && m.name.toLowerCase().includes(term)) ||
+        (m.email && m.email.toLowerCase().includes(term)) ||
+        (m.message && m.message.toLowerCase().includes(term))
+      );
+    }
+    this.cdr.detectChanges();
+  }
+
+  deleteMessage(id: string) {
+    if (confirm('Delete this message?')) {
+      this.contactService.deleteMessage(id).subscribe(() => {
+        this.contactMessages = this.contactMessages.filter(m => (m.id || m._id) !== id);
+        this.filteredMessages = this.filteredMessages.filter(m => (m.id || m._id) !== id);
+        this.cdr.detectChanges();
+      });
+    }
+  }
+
+  updateMessageStatus(id: string, status: string) {
+    this.contactService.updateStatus(id, status).subscribe((updated) => {
+      const msg = this.contactMessages.find(m => (m.id || m._id) === id);
+      if (msg) msg.status = status;
+      this.cdr.detectChanges();
+    });
   }
 }

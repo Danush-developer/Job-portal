@@ -171,11 +171,14 @@
           </div>
         </div>
         <div class="contact-form-box">
-          <form class="simple-form">
-            <input type="text" placeholder="Full Name" required>
-            <input type="email" placeholder="Email Address" required>
-            <textarea placeholder="Tell us about your project" rows="4"></textarea>
-            <button type="submit" class="btn btn-primary">Send Message</button>
+          <form class="simple-form" (submit)="onSubmitContact()">
+            <input type="text" name="name" [(ngModel)]="contactForm.name" placeholder="Full Name" required>
+            <input type="email" name="email" [(ngModel)]="contactForm.email" placeholder="Email Address" required>
+            <textarea name="message" [(ngModel)]="contactForm.message" placeholder="Tell us about your project" rows="4" required></textarea>
+            <button type="submit" class="btn btn-primary" [disabled]="isSubmittingContact">
+              <i class="fas" [class.fa-spinner]="isSubmittingContact" [class.fa-spin]="isSubmittingContact" [class.fa-paper-plane]="!isSubmittingContact"></i>
+              {{ isSubmittingContact ? 'Sending...' : 'Send Message' }}
+            </button>
           </form>
         </div>
       </div>
