@@ -460,6 +460,56 @@ export class AdminDashboardComponent implements OnInit {
     this.refreshAllData();
   }
 
+  calculateMatchScore(app: any): number {
+    // 1. Find the job for this application
+    const job = this.jobs.find(j => 
+      String(j.id || j._id) === String(app.jobId) || 
+      (j.title && app.jobTitle && j.title.toLowerCase().trim() === app.jobTitle.toLowerCase().trim())
+    );
+    
+    if (!job) return 0;
+
+    let score = 0;
+    
+    // 2. Skill Matching (40 points)
+    const requiredSkills = (job.requiredSkills || '').toLowerCase().split(',').map((s: string) => s.trim()).filter((s: string) => s.length > 0);
+    const applicantSkills = (app.skills || '').toLowerCase().split(',').map((s: string) => s.trim()).filter((s: string) => s.length > 0);
+    
+    if (requiredSkills.length > 0) {
+      const matchedSkills = requiredSkills.filter((rs: string) => 
+        applicantSkills.some((as: string) => as.includes(rs) || rs.includes(as))
+      );
+      score += (matchedSkills.length / requiredSkills.length) * 40;
+    } else {
+      score += 40; // If no skills required, full points
+    }
+
+    // 3. Experience Matching (30 points)
+    const requiredExp = parseInt(job.experienceLevel) || 0;
+    const applicantExp = parseInt(app.experience) || 0;
+    
+    if (applicantExp >= requiredExp) {
+      score += 30;
+    } else if (applicantExp > 0) {
+      score += (applicantExp / requiredExp) * 30;
+    }
+
+    // 4. Bio/Summary Keyword Matching (30 points)
+    const bio = (app.bio || '').toLowerCase();
+    const jobDesc = (job.description || '').toLowerCase();
+    const keywords = ['expert', 'advanced', 'senior', 'lead', 'professional', 'hands-on', 'delivery'];
+    const matchedKeywords = keywords.filter(kw => bio.includes(kw));
+    score += (matchedKeywords.length / keywords.length) * 30;
+
+    return Math.round(Math.min(score, 100));
+  }
+
+  getScoreColor(score: number): string {
+    if (score >= 80) return '#10b981'; // Green
+    if (score >= 50) return '#f59e0b'; // Orange
+    return '#ef4444'; // Red
+  }
+
   openInterviewModal(app: any) {
     this.selectedAppForInterview = app;
     this.showInterviewModal = true;

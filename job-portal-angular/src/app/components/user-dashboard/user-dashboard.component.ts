@@ -282,4 +282,37 @@ export class UserDashboardComponent implements OnInit {
       resume: '', skills: '', experience: '', education: '', bio: ''
     };
   }
+
+  calculateMatchScore(job: any): number {
+    if (!this.userProfile || !job) return 0;
+    
+    let score = 0;
+    const requiredSkills = (job.requiredSkills || '').toLowerCase().split(',').map((s: string) => s.trim()).filter((s: string) => s.length > 0);
+    const userSkills = (this.userProfile.skills || '').toLowerCase().split(',').map((s: string) => s.trim()).filter((s: string) => s.length > 0);
+    
+    if (requiredSkills.length > 0) {
+      const matchedSkills = requiredSkills.filter((rs: string) => 
+        userSkills.some((us: string) => us.includes(rs) || rs.includes(us))
+      );
+      score += (matchedSkills.length / requiredSkills.length) * 60;
+    } else {
+      score += 60;
+    }
+
+    const requiredExp = parseInt(job.experienceLevel) || 0;
+    const userExp = parseInt(this.userProfile.experience) || 0;
+    if (userExp >= requiredExp) {
+      score += 40;
+    } else if (userExp > 0) {
+      score += (userExp / requiredExp) * 40;
+    }
+
+    return Math.round(Math.min(score, 100));
+  }
+
+  getScoreColor(score: number): string {
+    if (score >= 80) return '#10b981';
+    if (score >= 50) return '#f59e0b';
+    return '#ef4444';
+  }
 }

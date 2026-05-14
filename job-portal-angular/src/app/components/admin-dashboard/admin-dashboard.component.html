@@ -88,9 +88,11 @@
                   </div>
                 </div>
               </td>
+              <td>{{ app.jobTitle || 'N/A' }}</td>
               <td>
-                <div class="job-tag">
-                   <i class="fas fa-tag"></i> {{ app.jobTitle || 'General' }}
+                <div class="ai-score-badge" [style.border-color]="getScoreColor(calculateMatchScore(app))">
+                  <span class="score-value">{{ calculateMatchScore(app) }}%</span>
+                  <span class="score-label">Match</span>
                 </div>
               </td>
               <td class="subtext">{{ app.appliedDate | date:'mediumDate' }}</td>

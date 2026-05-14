@@ -85,6 +85,9 @@
                   {{ job.isActive ? job.jobType : 'Closed' }}
                 </span>
                 <span *ngIf="!job.isActive" class="badge badge-warning">No longer exists</span>
+                <div *ngIf="job.isActive" class="ai-match-card-badge" [style.background]="getScoreColor(calculateMatchScore(job))">
+                  <i class="fas fa-robot"></i> {{ calculateMatchScore(job) }}%
+                </div>
               </div>
             </div>
             <div class="card-body">

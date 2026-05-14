@@ -584,11 +584,33 @@
   margin-top: 1.5rem;
 }
 
-.modal-actions {
+.ai-score-badge {
   display: flex;
-  justify-content: flex-end;
-  gap: 1rem;
-  margin-top: 1rem;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  border: 3px solid;
+  border-radius: 50%;
+  padding: 5px;
+  background: white;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+}
+
+.score-value {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #1e293b;
+  line-height: 1;
+}
+
+.score-label {
+  font-size: 0.5rem;
+  text-transform: uppercase;
+  color: #64748b;
+  font-weight: 700;
+  margin-top: 2px;
 }
 
 .animate-scale-up {
