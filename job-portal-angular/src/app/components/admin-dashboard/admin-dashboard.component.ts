@@ -9,6 +9,7 @@ import { ContactService } from '../../services/contact.service';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { forkJoin } from 'rxjs';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -72,7 +73,8 @@ export class AdminDashboardComponent implements OnInit {
     private employeeService: EmployeeService,
     private contactService: ContactService,
     private http: HttpClient,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private toastService: ToastService
   ) {}
 
   ngOnInit() {
