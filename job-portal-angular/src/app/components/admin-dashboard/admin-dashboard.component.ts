@@ -467,6 +467,11 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   calculateMatchScore(app: any): number {
+    // 0. Use real AI screening score if available
+    if (app.isScreened && app.aiMatchScore !== undefined && app.aiMatchScore !== null) {
+      return app.aiMatchScore;
+    }
+
     // 1. Find the job for this application
     const job = this.jobs.find(j => 
       String(j.id || j._id) === String(app.jobId) || 

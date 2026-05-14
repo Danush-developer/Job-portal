@@ -72,6 +72,7 @@
             <tr>
               <th>CANDIDATE</th>
               <th>APPLIED FOR</th>
+              <th>AI MATCH</th>
               <th>DATE</th>
               <th>STATUS</th>
               <th>ACTIONS</th>
@@ -92,7 +93,7 @@
               <td>
                 <div class="ai-score-badge" [style.border-color]="getScoreColor(calculateMatchScore(app))">
                   <span class="score-value">{{ calculateMatchScore(app) }}%</span>
-                  <span class="score-label">Match</span>
+                  <span class="score-label">{{ app.isScreened ? 'AI' : 'EST' }}</span>
                 </div>
               </td>
               <td class="subtext">{{ app.appliedDate | date:'mediumDate' }}</td>
@@ -123,7 +124,7 @@
               </td>
             </tr>
             <tr *ngIf="filteredApplications.length === 0">
-              <td colspan="5" class="empty-state">
+              <td colspan="6" class="empty-state">
                 <i class="fas fa-user-slash"></i>
                 <p>No candidates found. Click "Master Sync" to refresh.</p>
               </td>
