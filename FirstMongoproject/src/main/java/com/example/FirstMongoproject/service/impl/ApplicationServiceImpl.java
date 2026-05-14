@@ -41,6 +41,9 @@ public class ApplicationServiceImpl implements ApplicationService {
     private NotificationService notificationService;
 
     @Autowired
+    private EmailService emailService;
+
+    @Autowired
     private AIService aiService;
 
     @Autowired
