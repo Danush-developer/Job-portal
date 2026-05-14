@@ -569,88 +569,82 @@
         </div>
       </div>
     </div>
-  <!-- AI Insights Modal -->
-  <div class="modal-backdrop" *ngIf="showAIModal">
-    <div class="modal-card ai-insight-modal animate-scale-up">
-      <header class="modal-header">
-        <div class="ai-header-content">
-          <div class="ai-icon-pulse"><i class="fas fa-robot"></i></div>
-          <div>
-            <h2>AI Candidate Insights</h2>
-            <p>Intelligent match analysis for {{ selectedAppForInsights?.employeeName }}</p>
-          </div>
-        </div>
-        <button class="btn-close" (click)="showAIModal = false">&times;</button>
-      </header>
-
-      <div class="modal-body">
-        <div class="ai-score-summary">
-          <div class="score-circle-large" [style.border-color]="getScoreColor(selectedAppForInsights?.aiMatchScore || 0)">
-            <span class="score-number">{{ selectedAppForInsights?.aiMatchScore || 0 }}%</span>
-            <span class="score-text">Match Score</span>
-          </div>
-          <div class="ai-summary-text">
-            <h3>Candidate Summary</h3>
-            <p>{{ selectedAppForInsights?.aiSummary }}</p>
-          </div>
+    <!-- AI Insights Modal (Applicants Pool Style) -->
+    <div *ngIf="showAIModal" class="modal-overlay" (click)="closeAIInsights()">
+      <div class="pool-modal animate-scale-up" (click)="$event.stopPropagation()">
+        <div class="pool-header">
+          <h1>Applicants Pool</h1>
+          <button class="close-btn" (click)="closeAIInsights()">&times;</button>
         </div>
 
-        <!-- NEW: Score Breakdown -->
-        <div class="ai-breakdown-section" *ngIf="selectedAppForInsights?.aiScoreBreakdown">
-          <h3>SCORING BREAKDOWN</h3>
-          <div class="breakdown-grid">
-            <div class="breakdown-item">
-              <span class="label">Skills Match</span>
-              <div class="progress-bar-container">
-                <div class="progress-bar" [style.width]="(selectedAppForInsights.aiScoreBreakdown.skills * 2) + '%'" [style.background]="'#6366f1'"></div>
-                <span class="progress-value">{{ selectedAppForInsights.aiScoreBreakdown.skills }}/50</span>
-              </div>
+        <div class="candidate-bar">
+          <div class="candidate-meta">
+            <h2 class="name">{{ selectedAppForInsights?.employeeName }}</h2>
+            <p class="email">{{ selectedAppForInsights?.employeeEmail }}</p>
+          </div>
+
+          <div class="action-row">
+            <div class="ai-badge-group">
+              <span class="ai-match-badge-pool">{{ selectedAppForInsights?.aiMatchScore }}% AI MATCH</span>
+              <a class="ai-insights-link"><i class="fas fa-chevron-up"></i> AI Insights</a>
             </div>
-            <div class="breakdown-item">
-              <span class="label">Experience</span>
-              <div class="progress-bar-container">
-                <div class="progress-bar" [style.width]="(selectedAppForInsights.aiScoreBreakdown.experience / 0.3) + '%'" [style.background]="'#10b981'"></div>
-                <span class="progress-value">{{ selectedAppForInsights.aiScoreBreakdown.experience }}/30</span>
-              </div>
-            </div>
-            <div class="breakdown-item">
-              <span class="label">Relevance</span>
-              <div class="progress-bar-container">
-                <div class="progress-bar" [style.width]="(selectedAppForInsights.aiScoreBreakdown.relevance * 5) + '%'" [style.background]="'#f59e0b'"></div>
-                <span class="progress-value">{{ selectedAppForInsights.aiScoreBreakdown.relevance }}/20</span>
-              </div>
+            
+            <button class="btn-action-text" (click)="viewResume(selectedAppForInsights?.id || selectedAppForInsights?._id)">
+              <i class="fas fa-file-alt"></i> Resume
+            </button>
+
+            <div class="status-dropdown-wrapper">
+              <select class="pool-status-select" [value]="selectedAppForInsights?.status" (change)="updateAppStatus(selectedAppForInsights?.id || selectedAppForInsights?._id, $any($event.target).value)">
+                <option value="PENDING">Pending</option>
+                <option value="SHORTLISTED">Shortlisted</option>
+                <option value="INTERVIEW">Interview</option>
+                <option value="HIRED">Hired</option>
+                <option value="REJECTED">Rejected</option>
+              </select>
             </div>
           </div>
         </div>
 
-        <div class="ai-grid">
-          <div class="ai-column">
-            <h4 class="title-success"><i class="fas fa-check-circle"></i> Key Strengths</h4>
-            <ul class="ai-list">
-              <li *ngFor="let strength of selectedAppForInsights?.aiStrengths">
-                <i class="fas fa-plus"></i> {{ strength }}
-              </li>
-              <li *ngIf="!selectedAppForInsights?.aiStrengths?.length">No specific strengths highlighted.</li>
-            </ul>
+        <div class="pool-content-grid">
+          <div class="left-col">
+            <div class="info-block">
+              <h3>CANDIDATE SUMMARY</h3>
+              <p class="summary-text">{{ selectedAppForInsights?.aiSummary }}</p>
+            </div>
+
+            <div class="info-block" style="margin-top: 2rem;">
+              <h3>MISSING SKILLS</h3>
+              <div class="pool-skill-chips missing">
+                <span *ngFor="let skill of selectedAppForInsights?.aiMissingSkills">{{ skill }}</span>
+              </div>
+            </div>
           </div>
-          <div class="ai-column">
-            <h4 class="title-warning"><i class="fas fa-exclamation-triangle"></i> Missing Skills</h4>
-            <ul class="ai-list">
-              <li *ngFor="let skill of selectedAppForInsights?.aiMissingSkills">
-                <i class="fas fa-minus"></i> {{ skill }}
-              </li>
-              <li *ngIf="!selectedAppForInsights?.aiMissingSkills?.length">Candidate meets all primary requirements!</li>
-            </ul>
+
+          <div class="right-col">
+            <div class="info-block">
+              <h3>STRENGTHS</h3>
+              <div class="pool-skill-chips strengths">
+                <span *ngFor="let strength of selectedAppForInsights?.aiStrengths">{{ strength }}</span>
+              </div>
+            </div>
+
+            <div class="info-block" style="margin-top: 2rem;">
+              <h3>EDUCATION & EXPERIENCE</h3>
+              <div class="edu-exp-text">
+                <p>Based on the analyzed resume, this candidate shows expertise in their field with a match score of {{ selectedAppForInsights?.aiMatchScore }}%.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Score Breakdown Bar -->
+        <div class="pool-footer-breakdown" *ngIf="selectedAppForInsights?.aiScoreBreakdown">
+          <div class="breakdown-pills">
+            <span class="pill skills">Skills: {{ selectedAppForInsights.aiScoreBreakdown.skills }}/50</span>
+            <span class="pill exp">Exp: {{ selectedAppForInsights.aiScoreBreakdown.experience }}/30</span>
+            <span class="pill rel">Rel: {{ selectedAppForInsights.aiScoreBreakdown.relevance }}/20</span>
           </div>
         </div>
       </div>
-
-      <footer class="modal-footer">
-        <button class="btn btn-outline" (click)="showAIModal = false">Close Analysis</button>
-        <button class="btn btn-primary" (click)="openInterviewModal(selectedAppForInsights); showAIModal = false" *ngIf="selectedAppForInsights?.status === 'PENDING'">
-          <i class="fas fa-calendar-check"></i> Schedule Interview
-        </button>
-      </footer>
     </div>
-  </div>
 </div>

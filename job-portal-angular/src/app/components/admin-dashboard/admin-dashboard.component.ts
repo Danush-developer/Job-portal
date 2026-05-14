@@ -545,6 +545,11 @@ export class AdminDashboardComponent implements OnInit {
     this.showAIModal = true;
   }
 
+  closeAIInsights() {
+    this.showAIModal = false;
+    this.selectedAppForInsights = null;
+  }
+
   openInterviewModal(app: any) {
     this.selectedAppForInterview = app;
     this.showInterviewModal = true;
