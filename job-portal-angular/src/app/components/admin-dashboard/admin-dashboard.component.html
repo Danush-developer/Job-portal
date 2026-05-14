@@ -595,6 +595,34 @@
           </div>
         </div>
 
+        <!-- NEW: Score Breakdown -->
+        <div class="ai-breakdown-section" *ngIf="selectedAppForInsights?.aiScoreBreakdown">
+          <h3>SCORING BREAKDOWN</h3>
+          <div class="breakdown-grid">
+            <div class="breakdown-item">
+              <span class="label">Skills Match</span>
+              <div class="progress-bar-container">
+                <div class="progress-bar" [style.width]="(selectedAppForInsights.aiScoreBreakdown.skills * 2) + '%'" [style.background]="'#6366f1'"></div>
+                <span class="progress-value">{{ selectedAppForInsights.aiScoreBreakdown.skills }}/50</span>
+              </div>
+            </div>
+            <div class="breakdown-item">
+              <span class="label">Experience</span>
+              <div class="progress-bar-container">
+                <div class="progress-bar" [style.width]="(selectedAppForInsights.aiScoreBreakdown.experience / 0.3) + '%'" [style.background]="'#10b981'"></div>
+                <span class="progress-value">{{ selectedAppForInsights.aiScoreBreakdown.experience }}/30</span>
+              </div>
+            </div>
+            <div class="breakdown-item">
+              <span class="label">Relevance</span>
+              <div class="progress-bar-container">
+                <div class="progress-bar" [style.width]="(selectedAppForInsights.aiScoreBreakdown.relevance * 5) + '%'" [style.background]="'#f59e0b'"></div>
+                <span class="progress-value">{{ selectedAppForInsights.aiScoreBreakdown.relevance }}/20</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div class="ai-grid">
           <div class="ai-column">
             <h4 class="title-success"><i class="fas fa-check-circle"></i> Key Strengths</h4>

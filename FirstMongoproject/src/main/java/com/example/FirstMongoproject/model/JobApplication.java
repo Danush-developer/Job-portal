@@ -43,7 +43,11 @@ public class JobApplication {
     private String aiSummary;
     private java.util.List<String> aiStrengths;
     private java.util.List<String> aiMissingSkills;
+    private java.util.Map<String, Integer> aiScoreBreakdown;
     private Boolean isScreened = false;
+
+    public java.util.Map<String, Integer> getAiScoreBreakdown() { return aiScoreBreakdown; }
+    public void setAiScoreBreakdown(java.util.Map<String, Integer> aiScoreBreakdown) { this.aiScoreBreakdown = aiScoreBreakdown; }
 
     public JobApplication() {}
 

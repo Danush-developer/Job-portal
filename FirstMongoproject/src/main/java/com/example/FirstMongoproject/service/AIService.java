@@ -36,9 +36,12 @@ public class AIService {
                 "RESUME TEXT:\n%s\n\n" +
                 "Provide a JSON response with the following keys:\n" +
                 "1. matchScore (0-100)\n" +
-                "2. summary (short summary of the candidate)\n" +
-                "3. strengths (list of strings)\n" +
-                "4. missingSkills (list of strings)\n\n" +
+                "2. breakdown (object with 'skills', 'experience', 'relevance' as integers summing to matchScore)\n" +
+                "3. summary (short summary of the candidate)\n" +
+                "4. strengths (list of strings)\n" +
+                "5. missingSkills (list of strings)\n" +
+                "6. extractedSkills (comma-separated string of skills found)\n\n" +
+                "SCORING RUBRIC: Skills (50pts), Experience (30pts), Relevance (20pts).\n" +
                 "Return ONLY the JSON object.",
                 job.getTitle(), job.getDescription(), job.getRequiredSkills(), job.getExperienceLevel(), resumeText
             );

@@ -269,6 +269,14 @@ public class ApplicationServiceImpl implements ApplicationService {
             app.setAiSummary((String) insights.getOrDefault("summary", ""));
             app.setAiStrengths((List<String>) insights.getOrDefault("strengths", null));
             app.setAiMissingSkills((List<String>) insights.getOrDefault("missingSkills", null));
+            app.setAiScoreBreakdown((Map<String, Integer>) insights.getOrDefault("breakdown", null));
+            
+            // Also update the main skills field if AI extracted them
+            String extSkills = (String) insights.getOrDefault("extractedSkills", "");
+            if (extSkills != null && !extSkills.isEmpty()) {
+                app.setSkills(extSkills);
+            }
+
             app.setIsScreened(true);
             app.setUpdatedDate(LocalDateTime.now());
 

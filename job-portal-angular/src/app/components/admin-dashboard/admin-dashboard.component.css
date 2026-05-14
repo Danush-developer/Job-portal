@@ -794,5 +794,66 @@
 }
 
 .btn-secondary:hover {
-  background: #e2e8f0;
+  background: #e2e880;
+}
+
+/* NEW: AI Scoring Breakdown Styles */
+.ai-breakdown-section {
+  margin: 0 1.5rem 1.5rem;
+  padding: 1.5rem;
+  background: #fdfdfd;
+  border: 1px dashed #cbd5e1;
+  border-radius: 16px;
+}
+
+.ai-breakdown-section h3 {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #64748b;
+  letter-spacing: 1px;
+  margin-bottom: 1.5rem;
+  margin-top: 0;
+}
+
+.breakdown-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.breakdown-item {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.breakdown-item .label {
+  min-width: 120px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.progress-bar-container {
+  flex-grow: 1;
+  height: 8px;
+  background: #f1f5f9;
+  border-radius: 4px;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.progress-bar {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 1s ease-in-out;
+}
+
+.progress-value {
+  position: absolute;
+  right: -55px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #1e293b;
 }
