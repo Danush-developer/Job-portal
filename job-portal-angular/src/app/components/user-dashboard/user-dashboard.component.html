@@ -1,6 +1,6 @@
-<div class="dashboard-wrapper">
+<div class="dashboard-wrapper" [class.public-layout]="isPublicView">
   <!-- Sidebar Navigation -->
-  <aside class="sidebar">
+  <aside class="sidebar" *ngIf="!isPublicView">
     <!-- Logo removed as requested -->
     <div style="height: 20px;"></div> 
     
@@ -23,12 +23,12 @@
     </nav>
   </aside>
 
-  <main class="main-content">
+  <main class="main-content" [class.no-sidebar]="isPublicView">
     <!-- Header -->
     <header class="content-header">
       <div class="greeting">
-        <h1>Dashboard</h1>
-        <p>Welcome back! Here's what's happening with your career.</p>
+        <h1>{{ isPublicView ? 'Available Jobs' : 'Dashboard' }}</h1>
+        <p>{{ isPublicView ? 'Discover your next career move with StepForwardx.' : 'Welcome back! Here\'s what\'s happening with your career.' }}</p>
       </div>
       <div class="header-actions">
         <div class="search-bar">
@@ -39,7 +39,7 @@
     </header>
 
     <!-- Stats Grid -->
-    <section class="stats-container animate-slide-up">
+    <section *ngIf="!isPublicView" class="stats-container animate-slide-up">
       <div class="stat-card">
         <div class="stat-icon primary"><i class="fas fa-eye"></i></div>
         <div class="stat-info">

@@ -21,6 +21,7 @@ export class UserDashboardComponent implements OnInit {
   searchTerm: string = '';
   filteredJobs: any[] = [];
   shortlistedCount: number = 0;
+  isPublicView: boolean = false;
   
   userProfile: any = {
     name: '',
@@ -62,7 +63,17 @@ export class UserDashboardComponent implements OnInit {
     this.loadJobs();
     this.loadMyApplications();
     this.loadUserProfile();
+    this.checkPublicView();
     this.checkPendingApplication();
+  }
+
+  checkPublicView() {
+    this.route.queryParams.subscribe(params => {
+      this.isPublicView = params['public'] === 'true';
+      if (this.isPublicView) {
+        this.view = 'jobs';
+      }
+    });
   }
 
   checkPendingApplication() {
