@@ -70,9 +70,9 @@
         <table class="data-table">
           <thead>
             <tr>
-              <th>CANDIDATE</th>
+              <th style="min-width: 200px;">CANDIDATE</th>
               <th>APPLIED FOR</th>
-              <th>AI MATCH</th>
+              <th style="width: 100px; text-align: center;">AI MATCH</th>
               <th>DATE</th>
               <th>STATUS</th>
               <th>ACTIONS</th>
@@ -89,9 +89,13 @@
                   </div>
                 </div>
               </td>
-              <td>{{ app.jobTitle || 'N/A' }}</td>
               <td>
-                <div class="ai-score-badge" [style.border-color]="getScoreColor(calculateMatchScore(app))">
+                <div class="job-info-cell">
+                  <span class="bold">{{ app.jobTitle || 'N/A' }}</span>
+                </div>
+              </td>
+              <td style="text-align: center;">
+                <div class="ai-score-badge" [style.border-color]="getScoreColor(calculateMatchScore(app))" style="margin: 0 auto;">
                   <span class="score-value">{{ calculateMatchScore(app) }}%</span>
                   <span class="score-label">{{ app.isScreened ? 'AI' : 'EST' }}</span>
                 </div>
@@ -114,6 +118,9 @@
                     <option value="HIRED">Hire</option>
                     <option value="REJECTED">Reject</option>
                   </select>
+                  <button class="btn-icon-small" (click)="viewAIInsights(app)" title="View AI Insights">
+                    <i class="fas fa-robot"></i>
+                  </button>
                   <button class="btn-icon-small" (click)="viewResume(app.id || app._id)" title="View Resume">
                     <i class="fas fa-eye"></i>
                   </button>
