@@ -29,4 +29,6 @@ public interface ApplicationService {
     List<JobApplication> getAllApplications();
 
     DashboardStats getDashboardStats();
+
+    JobApplication screenApplication(String applicationId);
 }

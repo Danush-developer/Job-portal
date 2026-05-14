@@ -148,5 +148,18 @@ public class ApplicationController {
         return ResponseEntity.ok(ApiResponse.success("Application deleted successfully", null));
     }
 
+    @PostMapping("/{id}/screen")
+    public ResponseEntity<ApiResponse<JobApplication>> screenApplication(@PathVariable String id) {
+        log.info("REST Request to screen application ID: {}", id);
+        try {
+            JobApplication screened = applicationService.screenApplication(id);
+            return ResponseEntity.ok(ApiResponse.success("AI Screening completed successfully", screened));
+        } catch (Exception e) {
+            log.error("AI Screening failed for application {}: {}", id, e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error("AI Screening failed: " + e.getMessage()));
+        }
+    }
+
 
 }

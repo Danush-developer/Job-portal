@@ -66,4 +66,8 @@ export class ApplicationService {
   deleteApplication(id: string): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${id}`);
   }
+
+  screenApplication(id: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/${id}/screen`, {});
+  }
 }

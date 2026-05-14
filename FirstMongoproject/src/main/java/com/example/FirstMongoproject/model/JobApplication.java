@@ -38,6 +38,13 @@ public class JobApplication {
     private LocalDateTime interviewDate;
     private String meetingLink;
 
+    // AI Screening Results
+    private Integer aiMatchScore;
+    private String aiSummary;
+    private java.util.List<String> aiStrengths;
+    private java.util.List<String> aiMissingSkills;
+    private Boolean isScreened = false;
+
     public JobApplication() {}
 
     // Getters and Setters
@@ -91,4 +98,19 @@ public class JobApplication {
 
     public String getMeetingLink() { return meetingLink; }
     public void setMeetingLink(String meetingLink) { this.meetingLink = meetingLink; }
+
+    public Integer getAiMatchScore() { return aiMatchScore; }
+    public void setAiMatchScore(Integer aiMatchScore) { this.aiMatchScore = aiMatchScore; }
+
+    public String getAiSummary() { return aiSummary; }
+    public void setAiSummary(String aiSummary) { this.aiSummary = aiSummary; }
+
+    public java.util.List<String> getAiStrengths() { return aiStrengths; }
+    public void setAiStrengths(java.util.List<String> aiStrengths) { this.aiStrengths = aiStrengths; }
+
+    public java.util.List<String> getAiMissingSkills() { return aiMissingSkills; }
+    public void setAiMissingSkills(java.util.List<String> aiMissingSkills) { this.aiMissingSkills = aiMissingSkills; }
+
+    public Boolean getIsScreened() { return isScreened; }
+    public void setIsScreened(Boolean isScreened) { this.isScreened = isScreened; }
 }

@@ -568,5 +568,60 @@
         </div>
       </div>
     </div>
+  <!-- AI Insights Modal -->
+  <div class="modal-backdrop" *ngIf="showAIModal">
+    <div class="modal-card ai-insight-modal animate-scale-up">
+      <header class="modal-header">
+        <div class="ai-header-content">
+          <div class="ai-icon-pulse"><i class="fas fa-robot"></i></div>
+          <div>
+            <h2>AI Candidate Insights</h2>
+            <p>Intelligent match analysis for {{ selectedAppForInsights?.employeeName }}</p>
+          </div>
+        </div>
+        <button class="btn-close" (click)="showAIModal = false">&times;</button>
+      </header>
+
+      <div class="modal-body">
+        <div class="ai-score-summary">
+          <div class="score-circle-large" [style.border-color]="getScoreColor(selectedAppForInsights?.aiMatchScore || 0)">
+            <span class="score-number">{{ selectedAppForInsights?.aiMatchScore || 0 }}%</span>
+            <span class="score-text">Match Score</span>
+          </div>
+          <div class="ai-summary-text">
+            <h3>Candidate Summary</h3>
+            <p>{{ selectedAppForInsights?.aiSummary }}</p>
+          </div>
+        </div>
+
+        <div class="ai-grid">
+          <div class="ai-column">
+            <h4 class="title-success"><i class="fas fa-check-circle"></i> Key Strengths</h4>
+            <ul class="ai-list">
+              <li *ngFor="let strength of selectedAppForInsights?.aiStrengths">
+                <i class="fas fa-plus"></i> {{ strength }}
+              </li>
+              <li *ngIf="!selectedAppForInsights?.aiStrengths?.length">No specific strengths highlighted.</li>
+            </ul>
+          </div>
+          <div class="ai-column">
+            <h4 class="title-warning"><i class="fas fa-exclamation-triangle"></i> Missing Skills</h4>
+            <ul class="ai-list">
+              <li *ngFor="let skill of selectedAppForInsights?.aiMissingSkills">
+                <i class="fas fa-minus"></i> {{ skill }}
+              </li>
+              <li *ngIf="!selectedAppForInsights?.aiMissingSkills?.length">Candidate meets all primary requirements!</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <footer class="modal-footer">
+        <button class="btn btn-outline" (click)="showAIModal = false">Close Analysis</button>
+        <button class="btn btn-primary" (click)="openInterviewModal(selectedAppForInsights); showAIModal = false" *ngIf="selectedAppForInsights?.status === 'PENDING'">
+          <i class="fas fa-calendar-check"></i> Schedule Interview
+        </button>
+      </footer>
+    </div>
   </div>
 </div>

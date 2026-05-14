@@ -31,6 +31,10 @@ export class AdminDashboardComponent implements OnInit {
   currentFilterTitle: string = '';
   currentJobId: string | null = null;
   currentJobTitle: string | null = null;
+  isUpdating: string | null = null;
+  isScreening: string | null = null;
+  selectedAppForInsights: any = null;
+  showAIModal: boolean = false;
 
   editingJob: any = null;
   jobForm = {
@@ -508,6 +512,30 @@ export class AdminDashboardComponent implements OnInit {
     if (score >= 80) return '#10b981'; // Green
     if (score >= 50) return '#f59e0b'; // Orange
     return '#ef4444'; // Red
+  }
+
+  screenApplication(app: any) {
+    if (this.isScreening) return;
+    this.isScreening = app.id;
+    this.applicationService.screenApplication(app.id).subscribe({
+      next: (res: any) => {
+        this.isScreening = null;
+        if (res.success) {
+          this.toastService.show('AI Screening completed successfully!', 'success');
+          this.refreshAllData();
+        }
+      },
+      error: (err: any) => {
+        this.isScreening = null;
+        console.error('AI Screening failed:', err);
+        this.toastService.show('AI Screening failed. Please ensure your API key is configured.', 'error');
+      }
+    });
+  }
+
+  viewAIInsights(app: any) {
+    this.selectedAppForInsights = app;
+    this.showAIModal = true;
   }
 
   openInterviewModal(app: any) {

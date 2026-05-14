@@ -36,10 +36,13 @@ public class ApplicationServiceImpl implements ApplicationService {
     private UserRepository userRepository;
 
     @Autowired
-    private EmailService emailService;
+    private NotificationService notificationService;
 
     @Autowired
-    private NotificationService notificationService;
+    private AIService aiService;
+
+    @Autowired
+    private DocumentParserService documentParserService;
 
     @Override
     public JobApplication applyForJob(JobApplication application) {
@@ -235,6 +238,40 @@ public class ApplicationServiceImpl implements ApplicationService {
                 });
             }
         });
+    }
+
+    @Override
+    public JobApplication screenApplication(String applicationId) {
+        log.info("Starting AI screening for application: {}", applicationId);
+        JobApplication app = getApplicationById(applicationId);
+        
+        if (app.getResumeData() == null || app.getResumeData().length == 0) {
+            throw new RuntimeException("No resume data found for this application");
+        }
+
+        Job job = jobRepository.findById(app.getJobId())
+                .orElseThrow(() -> new RuntimeException("Job not found for application: " + applicationId));
+
+        try {
+            // 1. Parse Resume
+            String resumeText = documentParserService.parseToString(app.getResumeData());
+            
+            // 2. AI Analysis
+            Map<String, Object> insights = aiService.analyzeResume(resumeText, job);
+            
+            // 3. Update Application
+            app.setAiMatchScore((Integer) insights.getOrDefault("matchScore", 0));
+            app.setAiSummary((String) insights.getOrDefault("summary", ""));
+            app.setAiStrengths((List<String>) insights.getOrDefault("strengths", null));
+            app.setAiMissingSkills((List<String>) insights.getOrDefault("missingSkills", null));
+            app.setIsScreened(true);
+            app.setUpdatedDate(LocalDateTime.now());
+
+            return applicationRepository.save(app);
+        } catch (Exception e) {
+            log.error("AI Screening failed: {}", e.getMessage());
+            throw new RuntimeException("AI Screening failed: " + e.getMessage());
+        }
     }
 
     @Override
