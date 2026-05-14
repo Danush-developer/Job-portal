@@ -1,7 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { JobService } from '../../services/job.service';
 import { ApplicationService } from '../../services/application.service';
 import { AuthService } from '../../services/auth.service';
@@ -54,6 +54,7 @@ export class UserDashboardComponent implements OnInit {
     public authService: AuthService,
     private employeeService: EmployeeService,
     private route: ActivatedRoute,
+    private router: Router,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -191,6 +192,15 @@ export class UserDashboardComponent implements OnInit {
   }
 
   openApplyForm(job: any) {
+    const userId = this.authService.getUserId();
+    if (!userId) {
+      // Store intent and redirect to login
+      localStorage.setItem('pendingJobId', job.id || job._id);
+      localStorage.setItem('pendingJobTitle', job.title);
+      this.router.navigate(['/login']);
+      return;
+    }
+
     this.selectedJob = job;
     // Smart Pre-fill: Use profile data to fill the application form
     this.applicationForm = {
