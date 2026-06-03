@@ -219,10 +219,19 @@ export class AdminDashboardComponent implements OnInit {
 
   getAppMatchScore(app: any): number {
     if (!app) return 0;
-    if (app.isScreened && app.aiMatchScore !== undefined && app.aiMatchScore !== null) {
-      return app.aiMatchScore;
+    const savedScore = this.toNumber(
+      app.aiMatchScore ?? app.matchScore ?? app.ai_score ?? app.ai_match_score
+    );
+    if (savedScore !== null) {
+      return Math.round(Math.max(0, Math.min(savedScore, 100)));
     }
     return this.calculateMatchScore(app);
+  }
+
+  private toNumber(value: any): number | null {
+    if (value === undefined || value === null || value === '') return null;
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
   }
 
   // Simplified match score: only compare required skills with applicant's skills (100% weight)
@@ -230,15 +239,19 @@ export class AdminDashboardComponent implements OnInit {
     // Directly compute skill match regardless of previous AI screening
     if (!app) return 0;
 
-    const job = this.jobs.find(j =>
-      String(j.id || j._id) === String(app.jobId) ||
-      (j.title && app.jobTitle && j.title.toLowerCase().trim() === app.jobTitle.toLowerCase().trim())
-    );
-    if (!job) return 0;
+    const jobId = String(app.jobId || app.job_id || app.job?.id || app.job?._id || '');
+    const jobTitle = String(app.jobTitle || app.job_title || app.job?.title || '').toLowerCase().trim();
 
-    const requiredSkills = (job.requiredSkills || '').toLowerCase()
+    const job = this.jobs.find(j =>
+      String(j.id || j._id) === jobId ||
+      (j.title && jobTitle && j.title.toLowerCase().trim() === jobTitle)
+    );
+
+    const requiredSkillsSource = job?.requiredSkills || app.requiredSkills || app.required_skills || '';
+    const requiredSkills = requiredSkillsSource.toLowerCase()
       .split(',').map((s: string) => s.trim()).filter((s: string) => s.length > 0);
-    const applicantSkills = (app.skills || '').toLowerCase()
+    const applicantSkillsSource = app.skills || app.extractedSkills || app.extracted_skills || '';
+    const applicantSkills = applicantSkillsSource.toLowerCase()
       .split(',').map((s: string) => s.trim()).filter((s: string) => s.length > 0);
 
     if (requiredSkills.length === 0) return 100;
@@ -503,13 +516,16 @@ export class AdminDashboardComponent implements OnInit {
   getRequiredSkills(app: any): string[] {
     if (!app) return [];
     // If the app already carries requiredSkills (populated after screening), use it
-    if (app.requiredSkills) {
-      return (app.requiredSkills || '').split(',').map((s: string) => s.trim()).filter((s: string) => s.length > 0);
+    const appRequiredSkills = app.requiredSkills || app.required_skills;
+    if (appRequiredSkills) {
+      return (appRequiredSkills || '').split(',').map((s: string) => s.trim()).filter((s: string) => s.length > 0);
     }
     // Fallback: locate the job and extract its requiredSkills
+    const jobId = String(app.jobId || app.job_id || app.job?.id || app.job?._id || '');
+    const jobTitle = String(app.jobTitle || app.job_title || app.job?.title || '').toLowerCase().trim();
     const job = this.jobs.find(j =>
-      String(j.id || j._id) === String(app.jobId) ||
-      (j.title && app.jobTitle && j.title.toLowerCase().trim() === app.jobTitle.toLowerCase().trim())
+      String(j.id || j._id) === jobId ||
+      (j.title && jobTitle && j.title.toLowerCase().trim() === jobTitle)
     );
     if (job && job.requiredSkills) {
       return (job.requiredSkills || '').split(',').map((s: string) => s.trim()).filter((s: string) => s.length > 0);
@@ -520,10 +536,19 @@ export class AdminDashboardComponent implements OnInit {
   /** Returns the job's required skills as a raw (original-case) array. */
   getJobRequiredSkills(app: any): string[] {
     if (!app) return [];
+    const appRequiredSkills = app.requiredSkills || app.required_skills;
+    if (appRequiredSkills) {
+      return (appRequiredSkills as string)
+        .split(',')
+        .map((s: string) => s.trim())
+        .filter((s: string) => s.length > 0);
+    }
+    const jobId = String(app.jobId || app.job_id || app.job?.id || app.job?._id || '');
+    const jobTitle = String(app.jobTitle || app.job_title || app.job?.title || '').toLowerCase().trim();
     const job = this.jobs.find(j =>
-      String(j.id || j._id) === String(app.jobId) ||
-      (j.title && app.jobTitle &&
-        j.title.toLowerCase().trim() === app.jobTitle.toLowerCase().trim())
+      String(j.id || j._id) === jobId ||
+      (j.title && jobTitle &&
+        j.title.toLowerCase().trim() === jobTitle)
     );
     if (!job || !job.requiredSkills) return [];
     return (job.requiredSkills as string)
