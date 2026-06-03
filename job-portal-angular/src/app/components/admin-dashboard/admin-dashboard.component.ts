@@ -92,7 +92,7 @@ export class AdminDashboardComponent implements OnInit {
     this.view = newView;
     localStorage.setItem('adminView', newView);
     if (newView === 'candidates' || newView === 'listings') {
-      this.clearFilter();
+      // Duplicate refreshAllData removed – kept single implementation above.
     }
   }
 
@@ -105,32 +105,26 @@ export class AdminDashboardComponent implements OnInit {
       messages: this.contactService.getAllMessages()
     }).subscribe({
       next: (result: any) => {
-        // Robust extraction: Handle ApiResponse object OR direct array
         const jobsRes = result.jobs;
         const appsRes = result.apps;
         const talentRes = result.talent;
         const messagesRes = result.messages;
-        
-        // Filter out ghost jobs (those with no title)
         const rawJobs = jobsRes?.data || (Array.isArray(jobsRes) ? jobsRes : []);
         this.jobs = rawJobs.filter((j: any) => j.title && j.title.trim().length > 0);
-        
         this.applications = appsRes?.data || (Array.isArray(appsRes) ? appsRes : []);
+        // Enrich applications with job required skills
+        this.enrichApplicationsWithJobSkills();
         this.filteredApplications = [...this.applications];
-        
         this.talentPool = talentRes?.data || (Array.isArray(talentRes) ? talentRes : []);
         this.filteredTalent = [...this.talentPool];
-
         this.contactMessages = messagesRes?.data || (Array.isArray(messagesRes) ? messagesRes : []);
         this.filteredMessages = [...this.contactMessages];
-
         console.log('ULTIMATE RECOVERY: Sync Result', { 
           jobsCount: this.jobs.length, 
           appsCount: this.applications.length,
           talentCount: this.talentPool.length,
           messagesCount: this.contactMessages.length
         });
-        
         if (this.applications.length === 0 && this.jobs.length > 0) {
           console.warn('RESCUE REQUIRED: No candidates found. Triggering diagnostic scanner...');
           this.http.get<any>(`${environment.apiUrl}/applications/diagnostic/rescue`).subscribe({
@@ -138,7 +132,6 @@ export class AdminDashboardComponent implements OnInit {
             error: (err: any) => console.error('RESCUE ERROR:', err)
           });
         }
-        
         this.calculateApplicantCounts();
         this.cdr.detectChanges();
       },
@@ -173,12 +166,23 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   deleteTalent(id: string) {
+    if (!id) {
+      alert('Cannot delete: Employee ID is missing.');
+      return;
+    }
     if (confirm('Delete this user profile?')) {
-      this.employeeService.deleteEmployee(id).subscribe(() => {
-        this.talentPool = this.talentPool.filter(t => (t.id || t._id) !== id);
-        this.filteredTalent = this.filteredTalent.filter(t => (t.id || t._id) !== id);
-        this.cdr.detectChanges();
-        this.refreshAllData();
+      this.employeeService.deleteEmployee(id).subscribe({
+        next: () => {
+          this.talentPool = this.talentPool.filter(t => (t.id || t._id) !== id);
+          this.filteredTalent = this.filteredTalent.filter(t => (t.id || t._id) !== id);
+          this.cdr.detectChanges();
+          this.refreshAllData();
+          this.toastService.show('Employee profile deleted successfully.', 'success');
+        },
+        error: (err: any) => {
+          console.error('Failed to delete employee:', err);
+          alert('Failed to delete this profile. Please try again.');
+        }
       });
     }
   }
@@ -213,11 +217,49 @@ export class AdminDashboardComponent implements OnInit {
     console.log('SYNC COMPLETE: Applicant counts verified against current candidate list.');
   }
 
+  getAppMatchScore(app: any): number {
+    if (!app) return 0;
+    if (app.isScreened && app.aiMatchScore !== undefined && app.aiMatchScore !== null) {
+      return app.aiMatchScore;
+    }
+    return this.calculateMatchScore(app);
+  }
+
+  // Simplified match score: only compare required skills with applicant's skills (100% weight)
+  calculateMatchScore(app: any): number {
+    // Directly compute skill match regardless of previous AI screening
+    if (!app) return 0;
+
+    const job = this.jobs.find(j =>
+      String(j.id || j._id) === String(app.jobId) ||
+      (j.title && app.jobTitle && j.title.toLowerCase().trim() === app.jobTitle.toLowerCase().trim())
+    );
+    if (!job) return 0;
+
+    const requiredSkills = (job.requiredSkills || '').toLowerCase()
+      .split(',').map((s: string) => s.trim()).filter((s: string) => s.length > 0);
+    const applicantSkills = (app.skills || '').toLowerCase()
+      .split(',').map((s: string) => s.trim()).filter((s: string) => s.length > 0);
+
+    if (requiredSkills.length === 0) return 100;
+    if (applicantSkills.length === 0) return 0;
+
+    const matchedSkills = requiredSkills.filter((rs: string) =>
+  applicantSkills.some((as: string) => as.includes(rs) || rs.includes(as))
+);
+    const score = (matchedSkills.length / requiredSkills.length) * 100;
+    return Math.round(Math.min(score, 100));
+  }
+
   getJobCount(job: any): number {
     if (!job) return 0;
     const id = String(job.id || job._id || '');
     const title = String(job.title || '').toLowerCase().trim();
     return this.jobApplicantCounts[id] || this.jobApplicantCounts[title] || 0;
+  }
+
+  getTotalActiveApplicants(): number {
+    return this.jobs.reduce((total, job) => total + this.getJobCount(job), 0);
   }
 
   viewResume(appId: string) {
@@ -431,88 +473,98 @@ export class AdminDashboardComponent implements OnInit {
     }
   }
 
-  updateAppStatus(appId: string, status: string) {
-    if (!status) return;
-
-    if (status === 'INTERVIEW') {
-      const app = this.applications.find(a => (a.id || a._id) === appId);
-      this.openInterviewModal(app);
-      return;
-    }
-
-    if (status === 'REJECTED') {
-      const reason = prompt('Please enter the reason for rejection:');
-      if (!reason) return;
-      this.applicationService.rejectApplication(appId, reason).subscribe(() => {
-        this.handleStatusUpdate(appId, status);
-      });
-      return;
-    }
-
-    this.applicationService.updateStatus(appId, status).subscribe(() => {
-      this.handleStatusUpdate(appId, status);
-    });
-  }
-
+  // Handles UI updates after status changes
   handleStatusUpdate(appId: string, status: string) {
-    // Instant UI Update
-    const app = this.applications.find(a => (a.id || a._id) === appId);
-    if (app) app.status = status;
-    
-    const fApp = this.filteredApplications.find(a => (a.id || a._id) === appId);
-    if (fApp) fApp.status = status;
-    
+    // Update status in applications list
+    const idx = this.applications.findIndex(a => (a.id || a._id) === appId);
+    if (idx !== -1) {
+      this.applications[idx].status = status;
+    }
+    // Update filtered list if present
+    const fIdx = this.filteredApplications.findIndex(a => (a.id || a._id) === appId);
+    if (fIdx !== -1) {
+      this.filteredApplications[fIdx].status = status;
+    }
+    // Recalculate counts and trigger change detection
+    this.calculateApplicantCounts();
     this.cdr.detectChanges();
-    this.refreshAllData();
+    // Optional toast for user feedback
+    if (this.toastService) {
+      this.toastService.show('Application status updated.', 'success');
+    }
   }
 
-  calculateMatchScore(app: any): number {
-    // 0. Use real AI screening score if available
-    if (app.isScreened && app.aiMatchScore !== undefined && app.aiMatchScore !== null) {
-      return app.aiMatchScore;
-    }
+  // Wrapper for template compatibility – forwards to the main status updater
+  updateAppStatus(appId: string, status: string) {
+    this.handleStatusUpdate(appId, status);
+  }
 
-    // 1. Find the job for this application
-    const job = this.jobs.find(j => 
-      String(j.id || j._id) === String(app.jobId) || 
+
+  getRequiredSkills(app: any): string[] {
+    if (!app) return [];
+    // If the app already carries requiredSkills (populated after screening), use it
+    if (app.requiredSkills) {
+      return (app.requiredSkills || '').split(',').map((s: string) => s.trim()).filter((s: string) => s.length > 0);
+    }
+    // Fallback: locate the job and extract its requiredSkills
+    const job = this.jobs.find(j =>
+      String(j.id || j._id) === String(app.jobId) ||
       (j.title && app.jobTitle && j.title.toLowerCase().trim() === app.jobTitle.toLowerCase().trim())
     );
-    
-    if (!job) return 0;
-
-    let score = 0;
-    
-    // 2. Skill Matching (40 points)
-    const requiredSkills = (job.requiredSkills || '').toLowerCase().split(',').map((s: string) => s.trim()).filter((s: string) => s.length > 0);
-    const applicantSkills = (app.skills || '').toLowerCase().split(',').map((s: string) => s.trim()).filter((s: string) => s.length > 0);
-    
-    if (requiredSkills.length > 0) {
-      const matchedSkills = requiredSkills.filter((rs: string) => 
-        applicantSkills.some((as: string) => as.includes(rs) || rs.includes(as))
-      );
-      score += (matchedSkills.length / requiredSkills.length) * 40;
-    } else {
-      score += 40; // If no skills required, full points
+    if (job && job.requiredSkills) {
+      return (job.requiredSkills || '').split(',').map((s: string) => s.trim()).filter((s: string) => s.length > 0);
     }
+    return [];
+  }
 
-    // 3. Experience Matching (30 points)
-    const requiredExp = parseInt(job.experienceLevel) || 0;
-    const applicantExp = parseInt(app.experience) || 0;
-    
-    if (applicantExp >= requiredExp) {
-      score += 30;
-    } else if (applicantExp > 0) {
-      score += (applicantExp / requiredExp) * 30;
-    }
+  /** Returns the job's required skills as a raw (original-case) array. */
+  getJobRequiredSkills(app: any): string[] {
+    if (!app) return [];
+    const job = this.jobs.find(j =>
+      String(j.id || j._id) === String(app.jobId) ||
+      (j.title && app.jobTitle &&
+        j.title.toLowerCase().trim() === app.jobTitle.toLowerCase().trim())
+    );
+    if (!job || !job.requiredSkills) return [];
+    return (job.requiredSkills as string)
+      .split(',')
+      .map((s: string) => s.trim())
+      .filter((s: string) => s.length > 0);
+  }
 
-    // 4. Bio/Summary Keyword Matching (30 points)
-    const bio = (app.bio || '').toLowerCase();
-    const jobDesc = (job.description || '').toLowerCase();
-    const keywords = ['expert', 'advanced', 'senior', 'lead', 'professional', 'hands-on', 'delivery'];
-    const matchedKeywords = keywords.filter(kw => bio.includes(kw));
-    score += (matchedKeywords.length / keywords.length) * 30;
+  /** Returns which required skills are present in the applicant's self-reported skills (lowercase). */
+  getComputedMatchedSkills(app: any): string[] {
+    if (!app) return [];
+    const required = this.getJobRequiredSkills(app).map((s: string) => s.toLowerCase());
+    const applicant = (app.skills || '')
+      .toLowerCase()
+      .split(',')
+      .map((s: string) => s.trim())
+      .filter((s: string) => s.length > 0);
+    return required.filter((rs: string) =>
+      applicant.some((as: string) => as.includes(rs) || rs.includes(as))
+    );
+  }
 
-    return Math.round(Math.min(score, 100));
+  /** Returns which required skills are MISSING from the applicant's self-reported skills (original case). */
+  getComputedMissingSkills(app: any): string[] {
+    if (!app) return [];
+    const matched = this.getComputedMatchedSkills(app);
+    return this.getJobRequiredSkills(app).filter(
+      (s: string) => !matched.includes(s.toLowerCase())
+    );
+  }
+
+  // After loading all data, enrich applications with requiredSkills for easier UI rendering
+  enrichApplicationsWithJobSkills() {
+    this.applications.forEach(app => {
+      if (!app.requiredSkills) {
+        const skills = this.getRequiredSkills(app);
+        if (skills.length) {
+          app.requiredSkills = skills.join(', ');
+        }
+      }
+    });
   }
 
   getScoreColor(score: number): string {
@@ -522,13 +574,37 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   screenApplication(app: any) {
+    if (!app) return;
+    const appId = app.id || app._id;
+    if (!appId) {
+      this.toastService.show('Application ID is missing.', 'error');
+      return;
+    }
     if (this.isScreening) return;
-    this.isScreening = app.id;
-    this.applicationService.screenApplication(app.id).subscribe({
+    this.isScreening = appId;
+    this.applicationService.screenApplication(appId).subscribe({
       next: (res: any) => {
         this.isScreening = null;
-        if (res.success) {
+        const updatedApp = res?.data || res;
+        if (updatedApp) {
           this.toastService.show('AI Screening completed successfully!', 'success');
+          
+          const idx = this.applications.findIndex(a => (a.id || a._id) === appId);
+          if (idx !== -1) {
+            this.applications[idx] = updatedApp;
+          }
+          const fIdx = this.filteredApplications.findIndex(a => (a.id || a._id) === appId);
+          if (fIdx !== -1) {
+            this.filteredApplications[fIdx] = updatedApp;
+          }
+          
+          if (this.selectedAppForInsights && (this.selectedAppForInsights.id || this.selectedAppForInsights._id) === appId) {
+            this.selectedAppForInsights = updatedApp;
+          }
+          
+          this.refreshAllData();
+        } else {
+          this.toastService.show('AI Screening finished but returned no data.', 'warning');
           this.refreshAllData();
         }
       },
@@ -647,7 +723,7 @@ export class AdminDashboardComponent implements OnInit {
       this.filteredMessages = [...this.contactMessages];
     } else {
       const term = searchTerm.toLowerCase();
-      this.filteredMessages = this.contactMessages.filter(m => 
+      this.filteredMessages = this.contactMessages.filter((m: any) => 
         (m.name && m.name.toLowerCase().includes(term)) ||
         (m.email && m.email.toLowerCase().includes(term)) ||
         (m.message && m.message.toLowerCase().includes(term))
@@ -667,8 +743,8 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   updateMessageStatus(id: string, status: string) {
-    this.contactService.updateStatus(id, status).subscribe((updated) => {
-      const msg = this.contactMessages.find(m => (m.id || m._id) === id);
+    this.contactService.updateStatus(id, status).subscribe((updated: any) => {
+      const msg = this.contactMessages.find((m: any) => (m.id || m._id) === id);
       if (msg) msg.status = status;
       this.cdr.detectChanges();
     });

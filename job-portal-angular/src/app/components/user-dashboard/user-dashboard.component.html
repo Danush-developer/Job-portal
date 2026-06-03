@@ -40,14 +40,7 @@
 
     <!-- Stats Grid -->
     <section *ngIf="!isPublicView" class="stats-container animate-slide-up">
-      <div class="stat-card">
-        <div class="stat-icon primary"><i class="fas fa-eye"></i></div>
-        <div class="stat-info">
-          <span class="label">Job Matches</span>
-          <h2 class="value">{{ jobs.length }}</h2>
-          <span class="trend up">+12% vs last month</span>
-        </div>
-      </div>
+
       <div class="stat-card">
         <div class="stat-icon success"><i class="fas fa-check-circle"></i></div>
         <div class="stat-info">
@@ -76,6 +69,8 @@
           <p>Hand-picked jobs based on your profile.</p>
         </div>
         
+
+        
         <div class="jobs-grid">
           <div *ngFor="let job of filteredJobs" class="job-card card">
             <div class="card-header">
@@ -94,9 +89,17 @@
               <h3>{{ job.title }}</h3>
               <p class="company-name">{{ job.company }}</p>
               <div class="job-meta">
-                <span><i class="fas fa-map-marker-alt"></i> {{ job.location }}</span>
-                <span><i class="fas fa-money-bill-wave"></i> {{ job.salary }}</span>
                 <span><i class="fas fa-briefcase"></i> {{ job.experienceLevel }}</span>
+                <span><i class="fas fa-money-bill-wave"></i> {{ job.salary }}</span>
+                <span><i class="fas fa-map-marker-alt"></i> {{ job.location }}</span>
+              </div>
+              <div class="job-skills" *ngIf="job.requiredSkills" style="margin-top: 1rem; display: flex; flex-wrap: wrap; gap: 0.4rem;">
+                <span class="badge" style="font-size: 0.7rem; background-color: #e0e7ff; color: #4338ca; border-radius: 4px; padding: 4px 8px;" *ngFor="let skill of (job.requiredSkills?.split(',') || [])">
+                  {{ skill.trim() }}
+                </span>
+              </div>
+              <div class="job-description" *ngIf="job.description" style="margin-top: 1rem; font-size: 0.85rem; color: #64748b; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;" [title]="job.description">
+                {{ job.description }}
               </div>
             </div>
             <div class="card-footer">

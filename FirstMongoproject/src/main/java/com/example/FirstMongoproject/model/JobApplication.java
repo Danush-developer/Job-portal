@@ -104,7 +104,10 @@ public class JobApplication {
     public void setMeetingLink(String meetingLink) { this.meetingLink = meetingLink; }
 
     public Integer getAiMatchScore() { return aiMatchScore; }
-    public void setAiMatchScore(Integer aiMatchScore) { this.aiMatchScore = aiMatchScore; }
+    private String requiredSkills; // comma-separated list of job required skills for this application
+
+    public String getRequiredSkills() { return requiredSkills; }
+    public void setRequiredSkills(String requiredSkills) { this.requiredSkills = requiredSkills; }
 
     public String getAiSummary() { return aiSummary; }
     public void setAiSummary(String aiSummary) { this.aiSummary = aiSummary; }
@@ -117,4 +120,7 @@ public class JobApplication {
 
     public Boolean getIsScreened() { return isScreened; }
     public void setIsScreened(Boolean isScreened) { this.isScreened = isScreened; }
+    public void setAiMatchScore(Integer aiMatchScore) {
+        this.aiMatchScore = aiMatchScore;
+    }
 }

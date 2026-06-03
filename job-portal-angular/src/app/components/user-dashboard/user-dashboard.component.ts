@@ -20,6 +20,10 @@ export class UserDashboardComponent implements OnInit {
   view: 'jobs' | 'my-apps' | 'apply' | 'profile' | 'account' = 'jobs';
   searchTerm: string = '';
   filteredJobs: any[] = [];
+  minExp: number | null = null;
+  maxExp: number | null = null;
+  minSalary: number | null = null;
+  maxSalary: number | null = null;
   shortlistedCount: number = 0;
   isPublicView: boolean = false;
   
@@ -118,16 +122,45 @@ export class UserDashboardComponent implements OnInit {
   }
 
   filterJobs() {
-    if (!this.searchTerm) {
-      this.filteredJobs = [...this.jobs];
-    } else {
+    let result = [...this.jobs];
+    if (this.searchTerm) {
       const term = this.searchTerm.toLowerCase();
-      this.filteredJobs = this.jobs.filter(job => 
+      result = result.filter(job => 
         job.title?.toLowerCase().includes(term) || 
         job.company?.toLowerCase().includes(term) ||
         job.location?.toLowerCase().includes(term)
       );
     }
+
+    if (this.minExp !== null && this.minExp.toString() !== '') {
+      result = result.filter(job => {
+        const exp = parseInt(job.experienceLevel) || 0;
+        return exp >= this.minExp!;
+      });
+    }
+    if (this.maxExp !== null && this.maxExp.toString() !== '') {
+      result = result.filter(job => {
+        const exp = parseInt(job.experienceLevel) || 0;
+        return exp <= this.maxExp!;
+      });
+    }
+
+    if ((this.minSalary !== null && this.minSalary.toString() !== '') || (this.maxSalary !== null && this.maxSalary.toString() !== '')) {
+      result = result.filter(job => {
+        const numMatches = (job.salary || '').match(/\d+(\.\d+)?/g);
+        if (!numMatches) return false;
+        const nums = numMatches.map((n: string) => parseFloat(n));
+        const minJobSal = Math.min(...nums);
+        const maxJobSal = Math.max(...nums);
+        
+        let valid = true;
+        if (this.minSalary !== null && this.minSalary.toString() !== '' && maxJobSal < this.minSalary) valid = false;
+        if (this.maxSalary !== null && this.maxSalary.toString() !== '' && minJobSal > this.maxSalary) valid = false;
+        return valid;
+      });
+    }
+
+    this.filteredJobs = result;
     this.cdr.detectChanges();
   }
 
@@ -276,6 +309,24 @@ export class UserDashboardComponent implements OnInit {
     return link.substring(start, end).trim();
   }
 
+  calculateMatchScore(job: any): number {
+    if (!job) return 0;
+
+    // Skill Matching Only (100 points)
+    const requiredSkills = (job.requiredSkills || '').toLowerCase().split(',').map((s: string) => s.trim()).filter((s: string) => s.length > 0);
+    const applicantSkills = (this.userProfile?.skills || '').toLowerCase().split(',').map((s: string) => s.trim()).filter((s: string) => s.length > 0);
+
+    if (requiredSkills.length === 0) return 100; // No required skills means full match
+    if (applicantSkills.length === 0) return 0;
+
+    const matchedSkills = requiredSkills.filter((rs: string) =>
+      applicantSkills.some((as: string) => as.includes(rs) || rs.includes(as))
+    );
+    
+    const score = (matchedSkills.length / requiredSkills.length) * 100;
+    return Math.round(Math.min(score, 100));
+  }
+
   resetForm() {
     this.applicationForm = {
       employeeName: '', employeeEmail: '', phone: '',
@@ -283,32 +334,8 @@ export class UserDashboardComponent implements OnInit {
     };
   }
 
-  calculateMatchScore(job: any): number {
-    if (!this.userProfile || !job) return 0;
-    
-    let score = 0;
-    const requiredSkills = (job.requiredSkills || '').toLowerCase().split(',').map((s: string) => s.trim()).filter((s: string) => s.length > 0);
-    const userSkills = (this.userProfile.skills || '').toLowerCase().split(',').map((s: string) => s.trim()).filter((s: string) => s.length > 0);
-    
-    if (requiredSkills.length > 0) {
-      const matchedSkills = requiredSkills.filter((rs: string) => 
-        userSkills.some((us: string) => us.includes(rs) || rs.includes(us))
-      );
-      score += (matchedSkills.length / requiredSkills.length) * 60;
-    } else {
-      score += 60;
-    }
 
-    const requiredExp = parseInt(job.experienceLevel) || 0;
-    const userExp = parseInt(this.userProfile.experience) || 0;
-    if (userExp >= requiredExp) {
-      score += 40;
-    } else if (userExp > 0) {
-      score += (userExp / requiredExp) * 40;
-    }
 
-    return Math.round(Math.min(score, 100));
-  }
 
   getScoreColor(score: number): string {
     if (score >= 80) return '#10b981';

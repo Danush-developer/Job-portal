@@ -101,6 +101,18 @@ public class ApplicationServiceImpl implements ApplicationService {
             log.error("Error sending application confirmation email: {}", e.getMessage());
         }
 
+        // Auto-Screen if resume is present
+        if (saved.getResumeData() != null && saved.getResumeData().length > 0) {
+            try {
+                String appId = saved.getId();
+                if (appId != null) {
+                    return this.screenApplication(appId);
+                }
+            } catch (Exception e) {
+                log.error("Auto-screening failed for application: {}", e.getMessage());
+            }
+        }
+
         return saved;
     }
 
@@ -271,7 +283,9 @@ public class ApplicationServiceImpl implements ApplicationService {
             app.setAiMissingSkills((List<String>) insights.getOrDefault("missingSkills", null));
             app.setAiScoreBreakdown((Map<String, Integer>) insights.getOrDefault("breakdown", null));
             
-            // Also update the main skills field if AI extracted them
+            // Also store the list of required skills for later UI rendering
+            app.setRequiredSkills(job.getRequiredSkills());
+            // Also store extracted skills as strengths
             String extSkills = (String) insights.getOrDefault("extractedSkills", "");
             if (extSkills != null && !extSkills.isEmpty()) {
                 app.setSkills(extSkills);
