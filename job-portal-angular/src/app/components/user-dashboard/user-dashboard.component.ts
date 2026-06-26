@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -6,13 +6,19 @@ import { JobService } from '../../services/job.service';
 import { ApplicationService } from '../../services/application.service';
 import { AuthService } from '../../services/auth.service';
 import { EmployeeService } from '../../services/employee.service';
+import { DiscoverJobs } from './components/discover-jobs/discover-jobs';
+import { JobApplicationForm } from './components/job-application-form/job-application-form';
+import { MyApplications } from './components/my-applications/my-applications';
+import { Profile } from './components/profile/profile';
+import { Account } from './components/account/account';
 
 @Component({
   selector: 'app-user-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, DiscoverJobs, JobApplicationForm, MyApplications, Profile, Account],
   templateUrl: './user-dashboard.component.html',
-  styleUrls: ['./user-dashboard.component.css']
+  styleUrls: ['./user-dashboard.component.css'],
+  encapsulation: ViewEncapsulation.None
 })
 export class UserDashboardComponent implements OnInit {
   jobs: any[] = [];
@@ -73,7 +79,7 @@ export class UserDashboardComponent implements OnInit {
 
   checkPublicView() {
     this.route.queryParams.subscribe(params => {
-      this.isPublicView = params['public'] === 'true';
+      this.isPublicView = params['public'] === 'true' || !this.authService.currentUser();
       if (this.isPublicView) {
         this.view = 'jobs';
       }

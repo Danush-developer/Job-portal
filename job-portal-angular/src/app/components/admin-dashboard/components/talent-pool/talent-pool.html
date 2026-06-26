@@ -1,0 +1,75 @@
+<div class="view-container animate-fade-in">
+  <div class="content-header">
+    <div class="greeting">
+      <h1>Talent Pool</h1>
+      <p>Browse through all registered professional profiles.</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-secondary" (click)="onRefresh()">
+        <i class="fas fa-sync"></i> Refresh Pool
+      </button>
+    </div>
+  </div>
+
+  <div class="section-header">
+    <h2>Professional Network</h2>
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input type="text" placeholder="Search by name, skills, or email..." (input)="onFilter($event)">
+    </div>
+  </div>
+
+  <div class="table-container card">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>PROFESSIONAL</th>
+          <th>DESIGNATION</th>
+          <th>SKILLS</th>
+          <th>EXP</th>
+          <th>ACTIONS</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let person of filteredTalent">
+          <td>
+            <div class="candidate-info">
+              <div class="avatar">{{ person.name?.[0] || 'U' }}</div>
+              <div class="name-box">
+                <span class="bold">{{ person.name }}</span>
+                <span class="subtext">{{ person.email }}</span>
+              </div>
+            </div>
+          </td>
+          <td>{{ person.designation || 'N/A' }}</td>
+          <td>
+            <div class="skills-tags" style="display: flex; gap: 0.25rem; flex-wrap: wrap; max-width: 200px;">
+              <span class="badge badge-primary" style="font-size: 0.7rem; text-transform: uppercase;" *ngFor="let skill of (person.skills?.split(',') || [])">{{ skill.trim() }}</span>
+            </div>
+          </td>
+          <td>
+            <div class="exp-box">
+              <span class="bold">{{ person.experience || '0' }} yrs</span>
+              <p *ngIf="person.bio" class="subtext bio-preview" [title]="person.bio" style="font-size: 0.75rem; margin-top: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; max-width: 250px;">
+                {{ person.bio }}
+              </p>
+            </div>
+          </td>
+          <td>
+            <div class="actions-cell">
+              <button class="btn-delete" (click)="onDelete(person.id || person._id)">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="filteredTalent.length === 0">
+          <td colspan="5" class="empty-state">
+            <i class="fas fa-id-badge"></i>
+            <p>No profiles found in the talent pool.</p>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

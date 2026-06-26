@@ -1,0 +1,42 @@
+<div class="form-container">
+  <div class="card">
+    <header class="form-header">
+      <div>
+        <h2>Account Settings</h2>
+        <p>Manage your account credentials and security.</p>
+      </div>
+    </header>
+    
+    <div class="account-details" style="padding: 1.5rem;">
+      <div class="info-group" style="margin-bottom: 2rem;">
+        <h3 style="margin-bottom: 1rem; color: #1e293b;">Login Information</h3>
+        <div class="detail-item" style="display: flex; justify-content: space-between; padding: 1rem 0; border-bottom: 1px solid #f1f5f9;">
+          <span style="color: #64748b;">Email Address</span>
+          <span class="bold">{{ currentUser?.email }}</span>
+        </div>
+        <div class="detail-item" style="display: flex; justify-content: space-between; padding: 1rem 0; border-bottom: 1px solid #f1f5f9;">
+          <span style="color: #64748b;">Account Role</span>
+          <span class="badge badge-primary">{{ currentUser?.role }}</span>
+        </div>
+        <div class="detail-item" style="display: flex; justify-content: space-between; padding: 1rem 0;">
+          <span style="color: #64748b;">Member Since</span>
+          <span class="bold">April 2024</span>
+        </div>
+      </div>
+
+      <div class="security-group">
+        <h3 style="margin-bottom: 1rem; color: #1e293b;">Security</h3>
+        <div class="action-card" style="background: #f8fafc; padding: 1.5rem; border-radius: 12px; display: flex; align-items: center; gap: 1.5rem;">
+          <div style="background: #fff; width: 48px; height: 48px; border-radius: 10px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+            <i class="fas fa-key" style="color: #6366f1;"></i>
+          </div>
+          <div style="flex: 1;">
+            <h4 style="margin: 0; color: #1e293b;">Update Password</h4>
+            <p style="margin: 4px 0 0; font-size: 0.9rem; color: #64748b;">Keep your account secure by rotating your password.</p>
+          </div>
+          <button class="btn btn-outline" (click)="onLogout()">Change Password</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

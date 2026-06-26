@@ -1,37 +1,94 @@
-<div class="login-container animate-in">
-  <div class="glass-card login-card">
+<div class="login-container">
+  <div class="login-card">
+
     <div class="login-header">
       <h1>Welcome Back</h1>
       <p>Log in to manage your career path</p>
     </div>
 
-    <form (submit)="onLogin()">
+    <form #loginForm="ngForm" (ngSubmit)="onLogin(loginForm)">
+
+      <!-- Email -->
       <div class="input-group">
-        <label>Email Address</label>
-        <input type="email" name="email" [(ngModel)]="credentials.email" placeholder="name@company.com" required>
+        <label>
+          Email Address
+          <span class="required">*</span>
+        </label>
+
+        <input
+          type="email"
+          name="email"
+          [(ngModel)]="credentials.email"
+          #email="ngModel"
+          placeholder="Enter your registered email"
+          required
+          email>
+
+        <small
+          class="validation-msg"
+          *ngIf="email.errors?.['required'] && email.touched">
+          Email address is required
+        </small>
+
+        <small
+          class="validation-msg"
+          *ngIf="email.errors?.['email'] && email.touched">
+          Please enter a valid email address
+        </small>
       </div>
 
+      <!-- Password -->
       <div class="input-group">
-        <label>Password</label>
-        <input type="password" name="password" [(ngModel)]="credentials.password" placeholder="••••••••" required>
+        <label>
+          Password
+          <span class="required">*</span>
+        </label>
+
+        <input
+          type="password"
+          name="password"
+          [(ngModel)]="credentials.password"
+          #password="ngModel"
+          placeholder="Enter your password"
+          required>
+
+        <small
+          class="validation-msg"
+          *ngIf="password.errors?.['required'] && password.touched">
+          Password is required
+        </small>
       </div>
 
+      <!-- Backend Error -->
       <div *ngIf="error" class="error-msg">
         {{ error }}
       </div>
 
-      <button type="submit" class="btn btn-primary w-full" [disabled]="loading">
+      <!-- Login Button -->
+      <button
+        type="submit"
+        class="btn-primary"
+        [disabled]="loading || loginForm.invalid">
+
         <span *ngIf="!loading">Sign In</span>
         <span *ngIf="loading">Signing In...</span>
+
       </button>
 
       <div class="forgot-password">
-        <a routerLink="/forgot-password">Forgot Password?</a>
+        <a routerLink="/forgot-password">
+          Forgot Password?
+        </a>
       </div>
+
     </form>
 
     <div class="login-footer">
-      <p>Don't have an account? <a routerLink="/register">Register here</a></p>
+      <p>
+        Don't have an account?
+        <a routerLink="/register">Register here</a>
+      </p>
     </div>
+
   </div>
 </div>

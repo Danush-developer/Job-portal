@@ -1,8 +1,9 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-login',
@@ -12,29 +13,51 @@ import { AuthService } from '../../services/auth.service';
   styleUrls: ['./login.component.css']
 })
 export class LoginComponent {
-  credentials = { email: '', password: '' };
+  credentials = {
+    email: '',
+    password: ''
+  };
+
   error = '';
   loading = false;
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+    private toastr: ToastrService
+  ) {}
 
-  onLogin() {
+  onLogin(form: NgForm): void {
+    if (form.invalid) {
+      this.error = 'Please enter registered email and valid password';
+      this.toastr.warning('Please enter registered email and valid password');
+      return;
+    }
+
     this.loading = true;
     this.error = '';
+
     this.authService.login(this.credentials).subscribe({
-      next: (res) => {
+      next: (res: any) => {
+        this.loading = false;
+        this.toastr.success('Login successful');
+
         const pendingJobId = localStorage.getItem('pendingJobId');
+
         if (res.role === 'ADMIN') {
           this.router.navigate(['/admin']);
         } else if (pendingJobId) {
-          this.router.navigate(['/user'], { queryParams: { applyJobId: pendingJobId } });
+          this.router.navigate(['/user'], {
+            queryParams: { applyJobId: pendingJobId }
+          });
         } else {
           this.router.navigate(['/user']);
         }
       },
       error: (err: any) => {
-        this.error = err.error?.error || 'Invalid credentials';
         this.loading = false;
+        this.error = err.error?.error || 'Invalid email or password';
+        this.toastr.error('Enter registered email and valid password');
       }
     });
   }

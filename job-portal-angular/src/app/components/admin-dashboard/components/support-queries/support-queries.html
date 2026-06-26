@@ -1,0 +1,77 @@
+<div class="view-container animate-fade-in">
+  <div class="content-header">
+    <div class="greeting">
+      <h1>Support Queries</h1>
+      <p>Customer inquiries from the landing page contact form.</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-secondary" (click)="onRefresh()">
+        <i class="fas fa-sync"></i> Refresh Queries
+      </button>
+    </div>
+  </div>
+
+  <div class="section-header">
+    <h2>Customer Messages</h2>
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input type="text" placeholder="Search by name, email, or message..." (input)="onFilter($event)">
+    </div>
+  </div>
+
+  <div class="table-container card">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>SENDER</th>
+          <th>MESSAGE</th>
+          <th>DATE</th>
+          <th>STATUS</th>
+          <th>ACTIONS</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let msg of filteredMessages">
+          <td>
+            <div class="candidate-info">
+              <div class="avatar">{{ msg.name?.[0] || 'Q' }}</div>
+              <div class="name-box">
+                <span class="bold">{{ msg.name }}</span>
+                <span class="subtext">{{ msg.email }}</span>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="message-preview" [title]="msg.message" style="max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+              {{ msg.message }}
+            </div>
+          </td>
+          <td class="subtext">{{ msg.createdAt | date:'medium' }}</td>
+          <td>
+            <span class="badge" [ngClass]="msg.status === 'PENDING' ? 'badge-warning' : 'badge-success'">
+              {{ msg.status }}
+            </span>
+          </td>
+          <td>
+            <div class="actions-cell">
+              <select (change)="onUpdateStatus(msg.id || msg._id, $any($event.target).value)" class="status-select">
+                <option value="">Update</option>
+                <option value="PENDING">Pending</option>
+                <option value="RESOLVED">Resolved</option>
+              </select>
+              <button class="btn-delete" (click)="onDelete(msg.id || msg._id)">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="filteredMessages.length === 0">
+          <td colspan="5" class="empty-state">
+            <i class="fas fa-envelope-open"></i>
+            <p>No support queries found.</p>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

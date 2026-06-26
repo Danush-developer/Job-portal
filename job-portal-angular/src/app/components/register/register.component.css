@@ -28,6 +28,22 @@
   color: var(--text-muted);
 }
 
+.required {
+  color: #ef4444;
+  margin-left: 3px;
+}
+
+.validation-msg {
+  display: block;
+  margin-top: 5px;
+  color: #ef4444;
+  font-size: 13px;
+  font-weight: 500;
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
 .error-msg {
   background: rgba(239, 68, 68, 0.1);
   color: var(--danger);

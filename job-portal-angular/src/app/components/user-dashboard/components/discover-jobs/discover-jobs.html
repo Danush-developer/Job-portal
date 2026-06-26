@@ -1,0 +1,46 @@
+<div>
+  <div class="section-title">
+    <h2>Featured Opportunities</h2>
+    <p>Hand-picked jobs based on your profile.</p>
+  </div>
+  
+  <div class="jobs-grid">
+    <div *ngFor="let job of filteredJobs" class="job-card card">
+      <div class="card-header">
+        <div class="company-logo">{{ job.company?.[0] || 'J' }}</div>
+        <div class="header-badges">
+          <span class="badge" [ngClass]="job.isActive ? 'badge-primary' : 'badge-danger'">
+            {{ job.isActive ? job.jobType : 'Closed' }}
+          </span>
+          <span *ngIf="!job.isActive" class="badge badge-warning">No longer exists</span>
+          <div *ngIf="job.isActive" class="ai-match-card-badge" [style.background]="getScoreColor(calculateMatchScore(job))">
+            <i class="fas fa-robot"></i> {{ calculateMatchScore(job) }}%
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <h3>{{ job.title }}</h3>
+        <p class="company-name">{{ job.company }}</p>
+        <div class="job-meta">
+          <span><i class="fas fa-briefcase"></i> {{ job.experienceLevel }}</span>
+          <span><i class="fas fa-money-bill-wave"></i> {{ job.salary }}</span>
+          <span><i class="fas fa-map-marker-alt"></i> {{ job.location }}</span>
+        </div>
+        <div class="job-skills" *ngIf="job.requiredSkills" style="margin-top: 1rem; display: flex; flex-wrap: wrap; gap: 0.4rem;">
+          <span class="badge" style="font-size: 0.7rem; background-color: #e0e7ff; color: #4338ca; border-radius: 4px; padding: 4px 8px;" *ngFor="let skill of (job.requiredSkills?.split(',') || [])">
+            {{ skill.trim() }}
+          </span>
+        </div>
+        <div class="job-description" *ngIf="job.description" style="margin-top: 1rem; font-size: 0.85rem; color: #64748b; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;" [title]="job.description">
+          {{ job.description }}
+        </div>
+      </div>
+      <div class="card-footer">
+        <button class="btn btn-primary" (click)="onApplyForm(job)" [disabled]="hasApplied(job.id) || !job.isActive">
+          {{ !job.isActive ? 'Closed' : (hasApplied(job.id) ? 'Applied' : 'Apply Now') }}
+        </button>
+        <p *ngIf="!job.isActive" class="expiry-msg">Application deadline has passed</p>
+      </div>
+    </div>
+  </div>
+</div>

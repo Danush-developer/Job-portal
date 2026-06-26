@@ -44,505 +44,67 @@
 
   <!-- Main Content -->
   <main class="main-content">
-    <!-- View: Candidates (All Applications) -->
-    <div *ngIf="view === 'candidates'" class="view-container animate-fade-in">
-      <div class="content-header">
-        <div class="greeting">
-          <h1>{{ currentFilterTitle || 'Candidate Applications' }}</h1>
-          <p>Loaded {{ filteredApplications.length }} candidates from database.</p>
-        </div>
-        <div class="header-actions" style="display: flex; gap: 1rem;">
-          <button *ngIf="currentFilterTitle" class="btn btn-primary" (click)="clearFilter()">
-            <i class="fas fa-users"></i> Show All Candidates
-          </button>
-        </div>
-      </div>
-
-      <div class="section-header">
-        <h2>{{ currentFilterTitle ? 'Filtered Results' : 'Full Talent Pipeline' }}</h2>
-        <div class="search-box">
-          <i class="fas fa-search"></i>
-          <input type="text" placeholder="Search by name, job, or email..." #searchInput (input)="filterApplications(searchInput.value)">
-        </div>
-      </div>
-
-      <div class="table-container card">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th style="min-width: 200px;">CANDIDATE</th>
-              <th>APPLIED FOR</th>
-              <th style="width: 100px; text-align: center;">AI MATCH</th>
-              <th>DATE</th>
-              <th>STATUS</th>
-              <th>ACTIONS</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let app of filteredApplications">
-              <td>
-                <div class="candidate-info">
-                  <div class="avatar">{{ app.employeeName?.[0] || 'U' }}</div>
-                  <div class="name-box">
-                    <span class="bold">{{ app.employeeName }}</span>
-                    <span class="subtext">{{ app.employeeEmail }}</span>
-                  </div>
-                </div>
-              </td>
-              <td>
-                <div class="job-info-cell">
-                  <span class="bold">{{ app.jobTitle || 'N/A' }}</span>
-                </div>
-              </td>
-              <td style="text-align: center;">
-                <div class="ai-score-badge" [style.border-color]="getScoreColor(getAppMatchScore(app))" (click)="viewAIInsights(app)" style="margin: 0 auto; cursor: pointer;" title="Click to view AI Insights">
-                  <span class="score-value">{{ getAppMatchScore(app) }}%</span>
-                  <span class="score-label">{{ app.isScreened ? 'AI' : 'EST' }}</span>
-                </div>
-              </td>
-              <td class="subtext">{{ app.appliedDate | date:'mediumDate' }}</td>
-              <td>
-                <span class="badge" [ngClass]="{
-                  'badge-primary': app.status === 'PENDING',
-                  'badge-success': app.status === 'HIRED' || app.status === 'SHORTLISTED',
-                  'badge-warning': app.status === 'INTERVIEW',
-                  'badge-danger': app.status === 'REJECTED'
-                }">{{ app.status }}</span>
-              </td>
-              <td>
-                <div class="actions-cell">
-                  <select (change)="updateAppStatus(app.id || app._id, $any($event.target).value)" class="status-select">
-                    <option value="">Update</option>
-                    <option value="SHORTLISTED">Shortlist</option>
-                    <option value="INTERVIEW">Interview</option>
-                    <option value="HIRED">Hire</option>
-                    <option value="REJECTED">Reject</option>
-                  </select>
-                  <button class="btn-icon-small" (click)="viewResume(app.id || app._id)" title="View Resume">
-                    <i class="fas fa-eye"></i>
-                  </button>
-                  <button class="btn-delete" (click)="deleteApplication(app.id || app._id)">
-                    <i class="fas fa-trash"></i>
-                  </button>
-                </div>
-              </td>
-            </tr>
-            <tr *ngIf="filteredApplications.length === 0">
-              <td colspan="6" class="empty-state">
-                <i class="fas fa-user-slash"></i>
-                <p>No candidates found. Click "Master Sync" to refresh.</p>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-    <!-- View: Talent Pool (All Profiles) -->
-    <div *ngIf="view === 'talent'" class="view-container animate-fade-in">
-      <div class="content-header">
-        <div class="greeting">
-          <h1>Talent Pool</h1>
-          <p>Browse through all registered professional profiles.</p>
-        </div>
-        <div class="header-actions">
-          <button class="btn btn-secondary" (click)="refreshAllData()">
-            <i class="fas fa-sync"></i> Refresh Pool
-          </button>
-        </div>
-      </div>
-
-      <div class="section-header">
-        <h2>Professional Network</h2>
-        <div class="search-box">
-          <i class="fas fa-search"></i>
-          <input type="text" placeholder="Search by name, skills, or email..." #talentSearch (input)="filterTalent(talentSearch.value)">
-        </div>
-      </div>
-
-      <div class="table-container card">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>PROFESSIONAL</th>
-              <th>DESIGNATION</th>
-              <th>SKILLS</th>
-              <th>EXP</th>
-              <th>ACTIONS</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let person of filteredTalent">
-              <td>
-                <div class="candidate-info">
-                  <div class="avatar">{{ person.name?.[0] || 'U' }}</div>
-                  <div class="name-box">
-                    <span class="bold">{{ person.name }}</span>
-                    <span class="subtext">{{ person.email }}</span>
-                  </div>
-                </div>
-              </td>
-              <td>{{ person.designation || 'N/A' }}</td>
-              <td>
-                <div class="skills-tags" style="display: flex; gap: 0.25rem; flex-wrap: wrap; max-width: 200px;">
-                  <span class="badge badge-primary" style="font-size: 0.7rem; text-transform: uppercase;" *ngFor="let skill of (person.skills?.split(',') || [])">{{ skill.trim() }}</span>
-                </div>
-              </td>
-              <td>
-                <div class="exp-box">
-                  <span class="bold">{{ person.experience || '0' }} yrs</span>
-                  <p *ngIf="person.bio" class="subtext bio-preview" [title]="person.bio" style="font-size: 0.75rem; margin-top: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; max-width: 250px;">
-                    {{ person.bio }}
-                  </p>
-                </div>
-              </td>
-              <td>
-                <div class="actions-cell">
-                  <button class="btn-delete" (click)="deleteTalent(person.id || person._id)">
-                    <i class="fas fa-trash"></i>
-                  </button>
-                </div>
-              </td>
-            </tr>
-            <tr *ngIf="filteredTalent.length === 0">
-              <td colspan="5" class="empty-state">
-                <i class="fas fa-id-badge"></i>
-                <p>No profiles found in the talent pool.</p>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-    <!-- View: My Job Listings -->
-    <div *ngIf="view === 'listings'" class="view-container animate-fade-in">
-      <div class="content-header">
-        <div class="greeting">
-          <h1>My Job Listings</h1>
-          <p>Real-time overview of your active positions.</p>
-        </div>
-        <div class="header-actions" style="display: flex; gap: 1rem;">
-          <button class="btn btn-primary" (click)="switchView('post-job')">
-            <i class="fas fa-plus"></i> Post New Job
-          </button>
-        </div>
-      </div>
-
-      <!-- Stats Quick-View -->
-      <div class="stats-container" style="margin-bottom: 2rem;">
-        <div class="stat-card">
-          <div class="stat-icon primary"><i class="fas fa-briefcase"></i></div>
-          <div class="stat-info">
-            <span class="label">Total Jobs</span>
-            <h3 class="value">{{ jobs.length }}</h3>
-          </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon success"><i class="fas fa-users"></i></div>
-          <div class="stat-info">
-            <span class="label">Total Applicants</span>
-            <h3 class="value">{{ getTotalActiveApplicants() }}</h3>
-          </div>
-        </div>
-      </div>
-
-      <div class="table-container card">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>JOB POSITION</th>
-              <th>COMPANY</th>
-              <th>CANDIDATES</th>
-               <th>TYPE</th>
-               <th>STATUS</th>
-               <th>ACTIONS</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let job of jobs">
-              <td class="bold">{{ job.title }}</td>
-              <td>{{ job.company }}</td>
-              <td>
-                <div class="applicant-count orange-theme" (click)="viewJobApplications(job.id || job._id, job.title)">
-                  <i class="fas fa-user-tie"></i>
-                  <span>{{ getJobCount(job) || job.totalApplications || 0 }} Applicants</span>
-                </div>
-              </td>
-               <td><span class="job-chip">{{ job.jobType }}</span></td>
-               <td>
-                 <span class="badge" [ngClass]="job.isActive ? 'badge-success' : 'badge-danger'">
-                   {{ job.isActive ? 'Active' : 'Expired' }}
-                 </span>
-                 <p *ngIf="!job.isActive" class="subtext" style="color: #ef4444; font-size: 0.65rem; margin-top: 4px;">
-                   No longer exists
-                 </p>
-               </td>
-               <td>
-                <div class="actions-cell">
-                  <button class="btn-icon-small" (click)="viewJobApplications(job.id || job._id, job.title)" title="View Applicants">
-                    <i class="fas fa-eye"></i>
-                  </button>
-                  <button class="btn-icon-small" (click)="editJob(job)" title="Edit">
-                    <i class="fas fa-edit"></i>
-                  </button>
-                  <button class="btn-icon-small danger" (click)="deleteJob(job.id || job._id)" title="Delete">
-                    <i class="fas fa-trash"></i>
-                  </button>
-                </div>
-              </td>
-            </tr>
-            <tr *ngIf="jobs.length === 0">
-              <td colspan="5" class="empty-state">
-                <i class="fas fa-folder-open"></i>
-                <p>No jobs found. Start by posting a new job!</p>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- View: Post New Job -->
-    <div *ngIf="view === 'post-job'" class="view-container animate-fade-in">
-      <!-- (Form remains the same as previous functional version) -->
-      <div class="content-header">
-        <div class="greeting">
-          <h1>{{ editingJob ? 'Edit Job' : 'Post New Job' }}</h1>
-        </div>
-        <button class="btn btn-secondary" (click)="resetForm()">Back</button>
-      </div>
-      <div class="form-card card">
-        <form (ngSubmit)="onSubmitJob()">
-           <div class="form-grid">
-            <div class="input-group">
-              <label>Job Title</label>
-              <input type="text" name="title" [(ngModel)]="jobForm.title" required>
-            </div>
-            <div class="input-group">
-              <label>Job Active From</label>
-              <input type="datetime-local" name="startDate" [(ngModel)]="jobForm.startDate" required>
-            </div>
-            <div class="input-group">
-              <label>Job Active Until</label>
-              <input type="datetime-local" name="endDate" [(ngModel)]="jobForm.endDate" required>
-            </div>
-            <div class="input-group">
-              <label>Company</label>
-              <input type="text" name="company" [(ngModel)]="jobForm.company" required>
-            </div>
-            <div class="input-group">
-              <label>Location</label>
-              <input type="text" name="location" [(ngModel)]="jobForm.location" placeholder="e.g. Remote, New York" required>
-            </div>
-            <div class="input-group">
-              <label>Job Type</label>
-              <select name="jobType" [(ngModel)]="jobForm.jobType" required>
-                <option value="Full-time">Full-time</option>
-                <option value="Part-time">Part-time</option>
-                <option value="Contract">Contract</option>
-                <option value="Remote">Remote</option>
-              </select>
-            </div>
-            <div class="input-group">
-              <label>Experience Level</label>
-              <input type="text" name="exp" [(ngModel)]="jobForm.experienceLevel" placeholder="e.g. 2-5 years">
-            </div>
-            <div class="input-group">
-              <label>Salary Range</label>
-              <input type="text" name="salary" [(ngModel)]="jobForm.salary" placeholder="e.g. $80k - $120k">
-            </div>
-          </div>
-          <div class="input-group full-width">
-            <label>Required Skills (Comma separated)</label>
-            <input type="text" name="skills" [(ngModel)]="jobForm.requiredSkills" placeholder="Java, Angular, Spring Boot">
-          </div>
-          <div class="input-group full-width">
-            <label>Description</label>
-            <textarea name="description" [(ngModel)]="jobForm.description" rows="4" placeholder="Describe the role and responsibilities..."></textarea>
-          </div>
-          <div class="form-actions">
-            <button type="button" class="btn btn-secondary" (click)="resetForm()">Cancel</button>
-            <button type="submit" class="btn btn-primary">Save Job</button>
-          </div>
-        </form>
-      </div>
-    </div>
     
-    <!-- View: Analytics -->
-    <div *ngIf="view === 'analytics'" class="view-container animate-fade-in">
-      <div class="content-header">
-        <div class="greeting">
-          <h1>Dashboard Analytics</h1>
-          <p>Insights into your recruitment funnel and job performance.</p>
-        </div>
-      </div>
+    <app-all-candidates 
+      *ngIf="view === 'candidates'"
+      [filteredApplications]="filteredApplications"
+      [currentFilterTitle]="currentFilterTitle"
+      [isScreening]="isScreening"
+      [getAppMatchScore]="getAppMatchScore.bind(this)"
+      [getScoreColor]="getScoreColor.bind(this)"
+      (clearFilter)="clearFilter()"
+      (filterApplications)="filterApplications($event)"
+      (updateStatus)="updateAppStatus($event.appId, $event.status)"
+      (viewResume)="viewResume($event)"
+      (deleteApplication)="deleteApplication($event)"
+      (viewAIInsights)="viewAIInsights($event)">
+    </app-all-candidates>
 
-      <div class="analytics-grid">
-        <!-- Chart 1: Application Status -->
-        <div class="chart-card card">
-          <div class="chart-header">
-            <h3>Application Funnel</h3>
-            <span class="subtext">By Status</span>
-          </div>
-          <div class="chart-content">
-            <div class="pie-chart-container">
-              <div class="pie-chart" [style.background]="getPieStyle(analyticsData.statusCounts)"></div>
-              <div class="chart-center">
-                <span class="total">{{ applications.length }}</span>
-                <span class="label">Total</span>
-              </div>
-            </div>
-            <div class="chart-legend">
-              <div *ngFor="let item of analyticsData.statusCounts" class="legend-item">
-                <span class="dot" [style.background]="item.color"></span>
-                <span class="label text-truncate">{{ item.label }}</span>
-                <span class="value">{{ item.count }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
+    <app-talent-pool 
+      *ngIf="view === 'talent'"
+      [filteredTalent]="filteredTalent"
+      (refreshPool)="refreshAllData()"
+      (filterTalent)="filterTalent($event)"
+      (deleteTalent)="deleteTalent($event)">
+    </app-talent-pool>
 
-        <!-- Chart 2: Jobs by Type -->
-        <div class="chart-card card">
-          <div class="chart-header">
-            <h3>Opportunity Mix</h3>
-            <span class="subtext">By Job Type</span>
-          </div>
-          <div class="chart-content">
-            <div class="pie-chart-container">
-              <div class="pie-chart" [style.background]="getPieStyle(analyticsData.jobTypeCounts)"></div>
-              <div class="chart-center">
-                <span class="total">{{ jobs.length }}</span>
-                <span class="label">Jobs</span>
-              </div>
-            </div>
-            <div class="chart-legend">
-              <div *ngFor="let item of analyticsData.jobTypeCounts" class="legend-item">
-                <span class="dot" [style.background]="item.color"></span>
-                <span class="label text-truncate">{{ item.label }}</span>
-                <span class="value">{{ item.count }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+    <app-my-job-postings 
+      *ngIf="view === 'listings'"
+      [jobs]="jobs"
+      [jobApplicantCounts]="jobApplicantCounts"
+      (viewApplications)="viewJobApplications($event.jobId, $event.jobTitle)"
+      (editJob)="editJob($event)"
+      (deleteJob)="deleteJob($event)"
+      (switchView)="switchView($event)">
+    </app-my-job-postings>
 
-      <div class="analytics-footer card">
-        <div class="footer-info">
-          <i class="fas fa-info-circle"></i>
-          <p>These analytics are generated in real-time based on your current database records.</p>
-        </div>
-        <button class="btn btn-primary" (click)="refreshAllData()">Sync Data</button>
-      </div>
+    <app-post-new-jobs 
+      *ngIf="view === 'post-job'"
+      [editingJob]="editingJob"
+      [jobForm]="jobForm"
+      (submitJob)="onSubmitJob()"
+      (cancel)="resetForm()">
+    </app-post-new-jobs>
 
-      <!-- Job Performance Breakdown -->
-      <div class="section-header" style="margin-top: 2.5rem;">
-        <h2>Job Performance Breakdown</h2>
-        <p class="subtext">Status-wise distribution per position</p>
-      </div>
-      <div class="table-container card">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>JOB POSITION</th>
-              <th>APPLIED</th>
-              <th>SHORTLISTED</th>
-              <th>INTERVIEW</th>
-              <th>HIRED</th>
-              <th>REJECTED</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let job of jobs">
-              <td class="bold">{{ job.title }}</td>
-              <td>{{ getStatusCountForJob(job, 'ANY') }}</td>
-              <td style="color: #10b981; font-weight: 600;">{{ getStatusCountForJob(job, 'SHORTLISTED') }}</td>
-              <td style="color: #f59e0b; font-weight: 600;">{{ getStatusCountForJob(job, 'INTERVIEW') }}</td>
-              <td style="color: #6366f1; font-weight: 600;">{{ getStatusCountForJob(job, 'HIRED') }}</td>
-              <td style="color: #ef4444; font-weight: 600;">{{ getStatusCountForJob(job, 'REJECTED') }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+    <app-analytics 
+      *ngIf="view === 'analytics'"
+      [applications]="applications"
+      [jobs]="jobs"
+      [analyticsData]="analyticsData"
+      [getStatusCountForJob]="getStatusCountForJob.bind(this)"
+      [getPieStyle]="getPieStyle.bind(this)"
+      (refreshData)="refreshAllData()">
+    </app-analytics>
 
-    <!-- View: Support Queries (Contact Form Submissions) -->
-    <div *ngIf="view === 'queries'" class="view-container animate-fade-in">
-      <div class="content-header">
-        <div class="greeting">
-          <h1>Support Queries</h1>
-          <p>Customer inquiries from the landing page contact form.</p>
-        </div>
-        <div class="header-actions">
-          <button class="btn btn-secondary" (click)="loadContactMessages()">
-            <i class="fas fa-sync"></i> Refresh Queries
-          </button>
-        </div>
-      </div>
+    <app-support-queries 
+      *ngIf="view === 'queries'"
+      [filteredMessages]="filteredMessages"
+      (refreshQueries)="loadContactMessages()"
+      (filterMessages)="filterMessages($event)"
+      (updateMessageStatus)="updateMessageStatus($event.id, $event.status)"
+      (deleteMessage)="deleteMessage($event)">
+    </app-support-queries>
 
-      <div class="section-header">
-        <h2>Customer Messages</h2>
-        <div class="search-box">
-          <i class="fas fa-search"></i>
-          <input type="text" placeholder="Search by name, email, or message..." #querySearch (input)="filterMessages(querySearch.value)">
-        </div>
-      </div>
-
-      <div class="table-container card">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>SENDER</th>
-              <th>MESSAGE</th>
-              <th>DATE</th>
-              <th>STATUS</th>
-              <th>ACTIONS</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let msg of filteredMessages">
-              <td>
-                <div class="candidate-info">
-                  <div class="avatar">{{ msg.name?.[0] || 'Q' }}</div>
-                  <div class="name-box">
-                    <span class="bold">{{ msg.name }}</span>
-                    <span class="subtext">{{ msg.email }}</span>
-                  </div>
-                </div>
-              </td>
-              <td>
-                <div class="message-preview" [title]="msg.message" style="max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                  {{ msg.message }}
-                </div>
-              </td>
-              <td class="subtext">{{ msg.createdAt | date:'medium' }}</td>
-              <td>
-                <span class="badge" [ngClass]="msg.status === 'PENDING' ? 'badge-warning' : 'badge-success'">
-                  {{ msg.status }}
-                </span>
-              </td>
-              <td>
-                <div class="actions-cell">
-                  <select (change)="updateMessageStatus(msg.id || msg._id, $any($event.target).value)" class="status-select">
-                    <option value="">Update</option>
-                    <option value="PENDING">Pending</option>
-                    <option value="RESOLVED">Resolved</option>
-                  </select>
-                  <button class="btn-delete" (click)="deleteMessage(msg.id || msg._id)">
-                    <i class="fas fa-trash"></i>
-                  </button>
-                </div>
-              </td>
-            </tr>
-            <tr *ngIf="filteredMessages.length === 0">
-              <td colspan="5" class="empty-state">
-                <i class="fas fa-envelope-open"></i>
-                <p>No support queries found.</p>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
   </main>
 
   <!-- Interview Schedule Modal -->

@@ -1,0 +1,86 @@
+<div class="view-container animate-fade-in">
+  <div class="content-header">
+    <div class="greeting">
+      <h1>My Job Listings</h1>
+      <p>Real-time overview of your active positions.</p>
+    </div>
+    <div class="header-actions" style="display: flex; gap: 1rem;">
+      <button class="btn btn-primary" (click)="onPostNewJob()">
+        <i class="fas fa-plus"></i> Post New Job
+      </button>
+    </div>
+  </div>
+
+  <!-- Stats Quick-View -->
+  <div class="stats-container" style="margin-bottom: 2rem;">
+    <div class="stat-card">
+      <div class="stat-icon primary"><i class="fas fa-briefcase"></i></div>
+      <div class="stat-info">
+        <span class="label">Total Jobs</span>
+        <h3 class="value">{{ jobs.length }}</h3>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon success"><i class="fas fa-users"></i></div>
+      <div class="stat-info">
+        <span class="label">Total Applicants</span>
+        <h3 class="value">{{ getTotalActiveApplicants() }}</h3>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-container card">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>JOB POSITION</th>
+          <th>COMPANY</th>
+          <th>CANDIDATES</th>
+           <th>TYPE</th>
+           <th>STATUS</th>
+           <th>ACTIONS</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let job of jobs">
+          <td class="bold">{{ job.title }}</td>
+          <td>{{ job.company }}</td>
+          <td>
+            <div class="applicant-count orange-theme" (click)="onViewApplications(job.id || job._id, job.title)">
+              <i class="fas fa-user-tie"></i>
+              <span>{{ getJobCount(job) || job.totalApplications || 0 }} Applicants</span>
+            </div>
+          </td>
+           <td><span class="job-chip">{{ job.jobType }}</span></td>
+           <td>
+             <span class="badge" [ngClass]="job.isActive ? 'badge-success' : 'badge-danger'">
+               {{ job.isActive ? 'Active' : 'Expired' }}
+             </span>
+             <p *ngIf="!job.isActive" class="subtext" style="color: #ef4444; font-size: 0.65rem; margin-top: 4px;">
+               No longer exists
+             </p>
+           </td>
+           <td>
+            <div class="actions-cell">
+              <button class="btn-icon-small" (click)="onViewApplications(job.id || job._id, job.title)" title="View Applicants">
+                <i class="fas fa-eye"></i>
+              </button>
+              <button class="btn-icon-small" (click)="onEditJob(job)" title="Edit">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="btn-icon-small danger" (click)="onDeleteJob(job.id || job._id)" title="Delete">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="jobs.length === 0">
+          <td colspan="6" class="empty-state">
+            <i class="fas fa-folder-open"></i>
+            <p>No jobs found. Start by posting a new job!</p>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

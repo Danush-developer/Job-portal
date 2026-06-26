@@ -1,0 +1,92 @@
+<div class="view-container animate-fade-in">
+  <div class="content-header">
+    <div class="greeting">
+      <h1>{{ currentFilterTitle || 'Candidate Applications' }}</h1>
+      <p>Loaded {{ filteredApplications.length }} candidates from database.</p>
+    </div>
+    <div class="header-actions" style="display: flex; gap: 1rem;">
+      <button *ngIf="currentFilterTitle" class="btn btn-primary" (click)="onClearFilter()">
+        <i class="fas fa-users"></i> Show All Candidates
+      </button>
+    </div>
+  </div>
+
+  <div class="section-header">
+    <h2>{{ currentFilterTitle ? 'Filtered Results' : 'Full Talent Pipeline' }}</h2>
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input type="text" placeholder="Search by name, job, or email..." (input)="onFilter($event)">
+    </div>
+  </div>
+
+  <div class="table-container card">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th style="min-width: 200px;">CANDIDATE</th>
+          <th>APPLIED FOR</th>
+          <th style="width: 100px; text-align: center;">AI MATCH</th>
+          <th>DATE</th>
+          <th>STATUS</th>
+          <th>ACTIONS</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let app of filteredApplications">
+          <td>
+            <div class="candidate-info">
+              <div class="avatar">{{ app.employeeName?.[0] || 'U' }}</div>
+              <div class="name-box">
+                <span class="bold">{{ app.employeeName }}</span>
+                <span class="subtext">{{ app.employeeEmail }}</span>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="job-info-cell">
+              <span class="bold">{{ app.jobTitle || 'N/A' }}</span>
+            </div>
+          </td>
+          <td style="text-align: center;">
+            <div class="ai-score-badge" [style.border-color]="getScoreColor(getAppMatchScore(app))" (click)="onViewAIInsights(app)" style="margin: 0 auto; cursor: pointer;" title="Click to view AI Insights">
+              <span class="score-value">{{ getAppMatchScore(app) }}%</span>
+              <span class="score-label">{{ app.isScreened ? 'AI' : 'EST' }}</span>
+            </div>
+          </td>
+          <td class="subtext">{{ app.appliedDate | date:'mediumDate' }}</td>
+          <td>
+            <span class="badge" [ngClass]="{
+              'badge-primary': app.status === 'PENDING',
+              'badge-success': app.status === 'HIRED' || app.status === 'SHORTLISTED',
+              'badge-warning': app.status === 'INTERVIEW',
+              'badge-danger': app.status === 'REJECTED'
+            }">{{ app.status }}</span>
+          </td>
+          <td>
+            <div class="actions-cell">
+              <select (change)="onUpdateStatus(app.id || app._id, $any($event.target).value)" class="status-select">
+                <option value="">Update</option>
+                <option value="SHORTLISTED">Shortlist</option>
+                <option value="INTERVIEW">Interview</option>
+                <option value="HIRED">Hire</option>
+                <option value="REJECTED">Reject</option>
+              </select>
+              <button class="btn-icon-small" (click)="onViewResume(app.id || app._id)" title="View Resume">
+                <i class="fas fa-eye"></i>
+              </button>
+              <button class="btn-delete" (click)="onDeleteApplication(app.id || app._id)">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="filteredApplications.length === 0">
+          <td colspan="6" class="empty-state">
+            <i class="fas fa-user-slash"></i>
+            <p>No candidates found. Click "Master Sync" to refresh.</p>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

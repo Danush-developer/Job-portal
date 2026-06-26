@@ -1,0 +1,49 @@
+<div>
+  <div class="section-title">
+    <h2>My Applications</h2>
+    <p>Track the status of your job applications.</p>
+  </div>
+
+  <div class="table-container card">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Job Position</th>
+          <th>Applied Date</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let app of myApplications">
+          <td class="bold">{{ app.jobTitle || 'Position Specified' }}</td>
+          <td>{{ app.appliedDate | date:'mediumDate' }}</td>
+          <td>
+            <span class="badge" [ngClass]="{
+              'badge-primary': app.status === 'PENDING',
+              'badge-success': app.status === 'HIRED' || app.status === 'SHORTLISTED',
+              'badge-warning': app.status === 'INTERVIEW',
+              'badge-danger': app.status === 'REJECTED'
+            }">{{ app.status }}</span>
+            <div *ngIf="app.status === 'INTERVIEW'" class="interview-info">
+              <div class="interview-item">
+                <i class="fas fa-calendar-day"></i>
+                <span>{{ app.interviewDate | date:'MMM d, h:mm a' }}</span>
+              </div>
+              <div class="interview-item">
+                <i class="fas fa-video"></i>
+                <a [href]="getCleanLink(app.meetingLink)" target="_blank" class="meeting-link">Join Interview</a>
+              </div>
+            </div>
+          </td>
+          <td><button class="btn-text" (click)="onViewDetails(app)">View Details</button></td>
+        </tr>
+      </tbody>
+    </table>
+    <div *ngIf="myApplications.length === 0" class="empty-state">
+      <i class="fas fa-folder-open"></i>
+      <p>No applications found.</p>
+      <button class="btn btn-primary" (click)="onFindJobs()">Find Jobs</button>
+    </div>
+  </div>
+</div>

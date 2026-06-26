@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { JobService } from '../../services/job.service';
@@ -10,13 +10,20 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { forkJoin } from 'rxjs';
 import { ToastService } from '../../services/toast.service';
+import { MyJobPostings } from './components/my-job-postings/my-job-postings';
+import { PostNewJobs } from './components/post-new-jobs/post-new-jobs';
+import { AllCandidates } from './components/all-candidates/all-candidates';
+import { TalentPool } from './components/talent-pool/talent-pool';
+import { Analytics } from './components/analytics/analytics';
+import { SupportQueries } from './components/support-queries/support-queries';
 
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, MyJobPostings, PostNewJobs, AllCandidates, TalentPool, Analytics, SupportQueries],
   templateUrl: './admin-dashboard.component.html',
-  styleUrls: ['./admin-dashboard.component.css']
+  styleUrls: ['./admin-dashboard.component.css'],
+  encapsulation: ViewEncapsulation.None
 })
 export class AdminDashboardComponent implements OnInit {
   jobs: any[] = [];
@@ -509,7 +516,22 @@ export class AdminDashboardComponent implements OnInit {
 
   // Wrapper for template compatibility – forwards to the main status updater
   updateAppStatus(appId: string, status: string) {
-    this.handleStatusUpdate(appId, status);
+    if (status === 'INTERVIEW') {
+      const app = this.applications.find(a => (a.id || a._id) === appId);
+      if (app) {
+        this.openInterviewModal(app);
+      }
+    } else if (status !== '') {
+      this.applicationService.updateStatus(appId, status).subscribe({
+        next: () => {
+          this.handleStatusUpdate(appId, status);
+        },
+        error: (err) => {
+          console.error('Failed to update status:', err);
+          alert('Failed to update application status on server.');
+        }
+      });
+    }
   }
 
 

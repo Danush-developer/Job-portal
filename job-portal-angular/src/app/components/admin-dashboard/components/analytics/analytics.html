@@ -1,0 +1,96 @@
+<div class="view-container animate-fade-in">
+  <div class="content-header">
+    <div class="greeting">
+      <h1>Dashboard Analytics</h1>
+      <p>Insights into your recruitment funnel and job performance.</p>
+    </div>
+  </div>
+
+  <div class="analytics-grid">
+    <!-- Chart 1: Application Status -->
+    <div class="chart-card card">
+      <div class="chart-header">
+        <h3>Application Funnel</h3>
+        <span class="subtext">By Status</span>
+      </div>
+      <div class="chart-content">
+        <div class="pie-chart-container">
+          <div class="pie-chart" [style.background]="getPieStyle(analyticsData.statusCounts)"></div>
+          <div class="chart-center">
+            <span class="total">{{ applications.length }}</span>
+            <span class="label">Total</span>
+          </div>
+        </div>
+        <div class="chart-legend">
+          <div *ngFor="let item of analyticsData.statusCounts" class="legend-item">
+            <span class="dot" [style.background]="item.color"></span>
+            <span class="label text-truncate">{{ item.label }}</span>
+            <span class="value">{{ item.count }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chart 2: Jobs by Type -->
+    <div class="chart-card card">
+      <div class="chart-header">
+        <h3>Opportunity Mix</h3>
+        <span class="subtext">By Job Type</span>
+      </div>
+      <div class="chart-content">
+        <div class="pie-chart-container">
+          <div class="pie-chart" [style.background]="getPieStyle(analyticsData.jobTypeCounts)"></div>
+          <div class="chart-center">
+            <span class="total">{{ jobs.length }}</span>
+            <span class="label">Jobs</span>
+          </div>
+        </div>
+        <div class="chart-legend">
+          <div *ngFor="let item of analyticsData.jobTypeCounts" class="legend-item">
+            <span class="dot" [style.background]="item.color"></span>
+            <span class="label text-truncate">{{ item.label }}</span>
+            <span class="value">{{ item.count }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="analytics-footer card">
+    <div class="footer-info">
+      <i class="fas fa-info-circle"></i>
+      <p>These analytics are generated in real-time based on your current database records.</p>
+    </div>
+    <button class="btn btn-primary" (click)="onRefresh()">Sync Data</button>
+  </div>
+
+  <!-- Job Performance Breakdown -->
+  <div class="section-header" style="margin-top: 2.5rem;">
+    <h2>Job Performance Breakdown</h2>
+    <p class="subtext">Status-wise distribution per position</p>
+  </div>
+  <div class="table-container card">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>JOB POSITION</th>
+          <th>APPLIED</th>
+          <th>SHORTLISTED</th>
+          <th>INTERVIEW</th>
+          <th>HIRED</th>
+          <th>REJECTED</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let job of jobs">
+          <td class="bold">{{ job.title }}</td>
+          <td>{{ getStatusCountForJob(job, 'ANY') }}</td>
+          <td style="color: #10b981; font-weight: 600;">{{ getStatusCountForJob(job, 'SHORTLISTED') }}</td>
+          <td style="color: #f59e0b; font-weight: 600;">{{ getStatusCountForJob(job, 'INTERVIEW') }}</td>
+          <td style="color: #6366f1; font-weight: 600;">{{ getStatusCountForJob(job, 'HIRED') }}</td>
+          <td style="color: #ef4444; font-weight: 600;">{{ getStatusCountForJob(job, 'REJECTED') }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

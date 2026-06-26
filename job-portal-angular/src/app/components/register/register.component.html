@@ -1,29 +1,75 @@
 <div class="login-container animate-in">
   <div class="glass-card login-card">
+
     <div class="login-header">
       <h1>Create Account</h1>
       <p>Join our portal to find your dream job</p>
     </div>
 
-    <form (submit)="onRegister()">
+    <form #registerForm="ngForm" (ngSubmit)="onRegister(registerForm)">
+
       <div class="input-group">
-        <label>Full Name</label>
-        <input type="text" name="name" [(ngModel)]="user.name" placeholder="John Doe" required>
+        <label>Full Name <span class="required">*</span></label>
+
+        <input
+          type="text"
+          name="name"
+          [(ngModel)]="user.name"
+          #name="ngModel"
+          placeholder="John Doe"
+          required>
+
+        <small class="validation-msg" *ngIf="name.invalid && name.touched">
+          Name is required
+        </small>
       </div>
 
       <div class="input-group">
-        <label>Email Address</label>
-        <input type="email" name="email" [(ngModel)]="user.email" placeholder="john@example.com" required>
+        <label>Email Address <span class="required">*</span></label>
+
+        <input
+          type="email"
+          name="email"
+          [(ngModel)]="user.email"
+          #email="ngModel"
+          placeholder="john@gmail.com"
+          required
+          pattern="^[a-zA-Z0-9._%+-]+@gmail\.com$">
+
+        <small class="validation-msg" *ngIf="email.errors?.['required'] && email.touched">
+          Email is required
+        </small>
+
+        <small class="validation-msg" *ngIf="email.errors?.['pattern'] && email.touched">
+          Email must contain @gmail.com
+        </small>
       </div>
 
       <div class="input-group">
-        <label>Password</label>
-        <input type="password" name="password" [(ngModel)]="user.password" placeholder="••••••••" required>
+        <label>Password <span class="required">*</span></label>
+
+        <input
+          type="password"
+          name="password"
+          [(ngModel)]="user.password"
+          #password="ngModel"
+          placeholder="Enter password"
+          required
+          minlength="6">
+
+        <small class="validation-msg" *ngIf="password.errors?.['required'] && password.touched">
+          Password is required
+        </small>
+
+        <small class="validation-msg" *ngIf="password.errors?.['minlength'] && password.touched">
+          Password must contain at least 6 characters
+        </small>
       </div>
 
       <div class="input-group">
-        <label>I am a...</label>
-        <select name="role" [(ngModel)]="user.role">
+        <label>I am a... <span class="required">*</span></label>
+
+        <select name="role" [(ngModel)]="user.role" required>
           <option value="USER">Job Seeker</option>
           <option value="ADMIN">Recruiter / Admin</option>
         </select>
@@ -33,14 +79,23 @@
         {{ error }}
       </div>
 
-      <button type="submit" class="btn btn-primary w-full" [disabled]="loading">
+      <button
+        type="submit"
+        class="btn btn-primary w-full"
+        [disabled]="loading || registerForm.invalid">
+
         <span *ngIf="!loading">Create Account</span>
         <span *ngIf="loading">Creating...</span>
       </button>
+
     </form>
 
     <div class="login-footer">
-      <p>Already have an account? <a routerLink="/login">Login here</a></p>
+      <p>
+        Already have an account?
+        <a routerLink="/login">Login here</a>
+      </p>
     </div>
+
   </div>
 </div>

@@ -1,0 +1,55 @@
+<div class="form-container">
+  <div class="card">
+    <header class="form-header">
+      <div>
+        <h2>My Profile</h2>
+        <p>Manage your professional information.</p>
+      </div>
+    </header>
+    
+    <form (submit)="onUpdate()" class="job-form">
+      <div class="form-grid">
+        <div class="input-group">
+          <label>Full Name</label>
+          <input type="text" name="p-name" [(ngModel)]="userProfile.name" placeholder="Full Name" required>
+        </div>
+        <div class="input-group">
+          <label>Email Address</label>
+          <input type="email" name="p-email" [(ngModel)]="userProfile.email" placeholder="Email" required>
+        </div>
+        <div class="input-group">
+          <label>Phone Number</label>
+          <input type="text" name="p-phone" [(ngModel)]="userProfile.phone" placeholder="Phone">
+        </div>
+        <div class="input-group">
+          <label>Current Designation</label>
+          <input type="text" name="p-designation" [(ngModel)]="userProfile.designation" placeholder="e.g. Software Engineer">
+        </div>
+        <div class="input-group">
+          <label>Years of Experience</label>
+          <input type="text" name="p-exp-years" [(ngModel)]="userProfile.experience" placeholder="e.g. 5">
+        </div>
+      </div>
+      
+      <div class="input-group">
+        <label>Professional Summary (Bio)</label>
+        <textarea name="p-bio" [(ngModel)]="userProfile.bio" rows="3" placeholder="Brief about your experience..."></textarea>
+      </div>
+
+      <div class="form-grid">
+        <div class="input-group">
+          <label>Skills</label>
+          <input type="text" name="p-skills" [(ngModel)]="userProfile.skills" placeholder="Java, Angular, etc.">
+        </div>
+        <div class="input-group">
+          <label>Education</label>
+          <input type="text" name="p-edu" [(ngModel)]="userProfile.education" placeholder="Degree, University">
+        </div>
+      </div>
+
+      <div class="form-footer">
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
