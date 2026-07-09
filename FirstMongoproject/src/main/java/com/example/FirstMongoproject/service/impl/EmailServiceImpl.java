@@ -10,10 +10,15 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Service;
 import org.springframework.scheduling.annotation.Async;
 import lombok.extern.slf4j.Slf4j;
-import com.sendgrid.*;
-import com.sendgrid.helpers.mail.Mail;
-import com.sendgrid.helpers.mail.objects.Content;
-import com.sendgrid.helpers.mail.objects.Email;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Arrays;
 
 import javax.annotation.PostConstruct;
 import java.time.LocalDateTime;
@@ -24,7 +29,7 @@ import java.util.List;
 @Service
 public class EmailServiceImpl implements EmailService {
 
-    @org.springframework.beans.factory.annotation.Value("${SENDGRID_API_KEY:}")
+    @org.springframework.beans.factory.annotation.Value("${BREVO_API_KEY:}")
     private String apiKey;
 
     @Autowired
@@ -36,7 +41,7 @@ public class EmailServiceImpl implements EmailService {
     @Autowired
     private EmployeeRepository employeeRepository;
 
-    @org.springframework.beans.factory.annotation.Value("${app.mail.sender}")
+    @org.springframework.beans.factory.annotation.Value("${brevo.from.email}")
     private String senderEmail;
 
     @PostConstruct
@@ -176,32 +181,41 @@ public class EmailServiceImpl implements EmailService {
         emailLogEntry.setSentAt(LocalDateTime.now());
 
         try {
-            log.info("DEBUG: Attempting to send email via SendGrid Web API to: [{}] with subject: [{}]", to, subject);
+            log.info("DEBUG: Attempting to send email via Brevo Web API to: [{}] with subject: [{}]", to, subject);
             
-            Email from = new Email(senderEmail, "StepForwardx HR");
-            Email recipient = new Email(to);
-            Content mailContent = new Content("text/plain", content);
-            Mail mail = new Mail(from, subject, recipient, mailContent);
+            RestTemplate restTemplate = new RestTemplate();
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.set("api-key", apiKey);
+            headers.set("accept", "application/json");
 
-            SendGrid sg = new SendGrid(apiKey);
-            Request request = new Request();
+            Map<String, Object> sender = new HashMap<>();
+            sender.put("name", "StepForwardx HR");
+            sender.put("email", senderEmail);
+
+            Map<String, Object> recipient = new HashMap<>();
+            recipient.put("email", to);
+
+            Map<String, Object> body = new HashMap<>();
+            body.put("sender", sender);
+            body.put("to", Arrays.asList(recipient));
+            body.put("subject", subject);
+            body.put("textContent", content);
+
+            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
+
+            ResponseEntity<String> response = restTemplate.postForEntity("https://api.brevo.com/v3/smtp/email", entity, String.class);
             
-            request.setMethod(Method.POST);
-            request.setEndpoint("mail/send");
-            request.setBody(mail.build());
-            
-            Response response = sg.api(request);
-            
-            log.info("DEBUG: SendGrid Status Code: {}", response.getStatusCode());
-            if (response.getStatusCode() >= 200 && response.getStatusCode() < 300) {
-                log.info("DEBUG: Email sent successfully via SendGrid Web API to: {}", to);
+            log.info("DEBUG: Brevo Status Code: {}", response.getStatusCodeValue());
+            if (response.getStatusCode().is2xxSuccessful()) {
+                log.info("DEBUG: Email sent successfully via Brevo Web API to: {}", to);
                 emailLogEntry.setStatus("SENT");
             } else {
-                log.error("DEBUG: SendGrid Error Response: {}", response.getBody());
-                throw new RuntimeException("SendGrid failed with status: " + response.getStatusCode());
+                log.error("DEBUG: Brevo Error Response: {}", response.getBody());
+                throw new RuntimeException("Brevo failed with status: " + response.getStatusCodeValue());
             }
         } catch (Exception e) {
-            log.error("EMAIL ERROR: Failed to send email via SendGrid API to {}. Error: {}", to, e.getMessage(), e);
+            log.error("EMAIL ERROR: Failed to send email via Brevo API to {}. Error: {}", to, e.getMessage(), e);
             emailLogEntry.setStatus("FAILED");
             emailLogEntry.setErrorMessage(e.getMessage());
         }
